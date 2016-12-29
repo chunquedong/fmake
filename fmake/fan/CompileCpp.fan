@@ -192,22 +192,17 @@ class CompileCpp : Task
   }
 
   private Void selectMacros(Str mode) {
-    nconfigs := [Str:Str][:]
-    configs.each |v, k| {
+    configs.dup.each |v, k| {
       pos := k.index("@")
       if (pos != null && pos < k.size) {
-        key := k[0..<pos]
-        mod := k[pos+1..-1]
-        if (mod == mode) {
-          nconfigs[key] = v
-        }
+        key := k.replace("@{$mode}", "")
+        configs[key] = v
       }
     }
-    configs.setAll(nconfigs)
   }
 
   private Void applayMacrosForList([Str:Str[]] params) {
-    configs.each |v, k| {
+    configs.dup.each |v, k| {
       if (v.size> 2 && v[0] == '[' && v[v.size-1] == ']') {
         pattern := v[1..-2]
         key := getPatternKey(pattern)
@@ -264,12 +259,12 @@ class CompileCpp : Task
   protected once File[] incDirs()
   {
       File[] incs := extIncDirs.dup
-
+      /*
       srcDirs.each |File f| {
         if (f.isDir) {
           incs.add(f)
         }
-      }
+      }*/
       incs.add(scriptDir)
 
       //depends include

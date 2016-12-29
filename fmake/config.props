@@ -4,8 +4,8 @@ msvc.incDirs=[/I@{incDirs}]
 msvc.libNames=[@{libNames}]
 msvc.objList=[@{objList}.obj]
 
-msvc.flags@debug= /DDEBUG
-msvc.flags@release= /O2
+msvc.flags@{debug}= /DDEBUG
+msvc.flags@{release}= /O2
 
 msvc.comp=cl /c /TP /EHsc /nologo /MD /DWIN32 /D_WINDOWS @{msvc.flags} @{msvc.defines} @{msvc.incDirs} /Fo@{objFile}.obj @{srcFile}
 msvc.lib=lib /OUT:@{outFile}.lib @{msvc.objList}
@@ -19,10 +19,10 @@ gcc.incDirs=[-I@{incDirs}]
 gcc.libNames=[-l@{libNames}]
 gcc.objList=[@{objList}.o]
 
-gcc.flags@debug=-DDEBUG
-gcc.flags@release= -O3
-gcc.name@cpp=g++ @{cppflags}
-gcc.name@c=gcc @{cflags}
+gcc.flags@{debug}=-DDEBUG
+gcc.flags@{release}= -O3
+gcc.name@{cpp}=g++ @{cppflags}
+gcc.name@{c}=gcc @{cflags}
 
 gcc.comp=@{gcc.name} -c -fPIC -fpermissive -Wall @{gcc.flags} @{gcc.defines} @{gcc.incDirs} -o @{objFile}.o @{srcFile}
 gcc.lib=ar -vcqs @{outLibFile}.a @{gcc.objList}
