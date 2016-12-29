@@ -2,12 +2,12 @@ msvc.defines=[/D@{defines}]
 msvc.libDirs=[/LIBPATH:@{libDirs}]
 msvc.incDirs=[/I@{incDirs}]
 msvc.libNames=[@{libNames}]
-msvc.objList=[@{objList}.obj]
+msvc.objList=[@{objList}]
 
 msvc.flags@{debug}= /DDEBUG
 msvc.flags@{release}= /O2
 
-msvc.comp=cl /c /TP /EHsc /nologo /MD /DWIN32 /D_WINDOWS @{msvc.flags} @{msvc.defines} @{msvc.incDirs} /Fo@{objFile}.obj @{srcFile}
+msvc.comp=cl /c /TP /EHsc /nologo /MD /DWIN32 /D_WINDOWS @{msvc.flags} @{msvc.defines} @{msvc.incDirs} /Fo@{objFile} @{srcFile}
 msvc.lib=lib /OUT:@{outFile}.lib @{msvc.objList}
 msvc.exe=link /NOLOGO @{msvc.libDirs} /OUT:@{outFile}.exe @{msvc.libNames} @{msvc.objList}
 msvc.dll=link /NOLOGO /DLL @{msvc.libDirs} /OUT:@{outFile}.dll @{msvc.libList} @{msvc.objList}
@@ -17,14 +17,14 @@ gcc.defines=[-D@{defines}]
 gcc.libDirs=[-L@{libDirs}]
 gcc.incDirs=[-I@{incDirs}]
 gcc.libNames=[-l@{libNames}]
-gcc.objList=[@{objList}.o]
+gcc.objList=[@{objList}]
 
 gcc.flags@{debug}=-DDEBUG
 gcc.flags@{release}= -O3
 gcc.name@{cpp}=g++ @{cppflags}
 gcc.name@{c}=gcc @{cflags}
 
-gcc.comp=@{gcc.name} -c -fPIC -fpermissive -Wall @{gcc.flags} @{gcc.defines} @{gcc.incDirs} -o @{objFile}.o @{srcFile}
+gcc.comp=@{gcc.name} -c -fPIC -fpermissive -Wall @{gcc.flags} @{gcc.defines} @{gcc.incDirs} -o @{objFile} @{srcFile}
 gcc.lib=ar -vcqs @{outLibFile}.a @{gcc.objList}
 gcc.exe=g++ -o @{outFile} @{gcc.objList} @{gcc.libDirs} @{gcc.libNames}
 gcc.dll=g++ -shared -o @{outLibFile}.so @{gcc.objList} @{gcc.libDirs} @{gcc.libList}

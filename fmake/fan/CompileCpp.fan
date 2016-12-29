@@ -80,6 +80,8 @@ class CompileCpp : Task
 
   private [Str:Str]? configs
 
+  private [File:Bool] fileDirtyMap := [:]
+
   ** ctor
   new make(BuildScript script, |This| f)
     : super(script)
@@ -105,14 +107,20 @@ class CompileCpp : Task
       throw fatal("CompileCpp init failed", e)
     }
 
-    srcList.each {
-      configs["srcFile"] = fileToStr(it)
-      objName := it.pathStr.replace(scriptDir.pathStr, "")
-      objFile := objDir+(objName).toUri
+    srcList.each |srcFile| {
+      //echo("touch $srcFile")
+      configs["srcFile"] = fileToStr(srcFile)
+      objName := srcFile.pathStr.replace(scriptDir.pathStr, "")
+      objFile := objDir+(objName+".o").toUri
+      if (objFile.exists && !objFile.isDir) {
+        if (!isDirty(srcFile, objFile.modified - 1sec)) {
+          return
+        }
+      }
       objFile.parent.create
       configs["objFile"] = fileToStr(objFile)
 
-      if (it.ext == "c") {
+      if (srcFile.ext == "c") {
         selectMacros("c")
       } else {
         selectMacros("cpp")
@@ -170,11 +178,12 @@ class CompileCpp : Task
     scriptPath := scriptDir.pathStr
     params["objList"] = srcList.map |f| {
       path := f.pathStr.replace(scriptPath, "")
-      return fileToStr(path.toUri.toFile)
+      return fileToStr((path+".o").toUri.toFile)
     }
 
     applayMacrosForList(params)
     selectMacros(debug)
+    fileDirtyMap.clear
   }
 
   private Str getPatternKey(Str s) {
@@ -275,6 +284,55 @@ class CompileCpp : Task
         incs.add(dep)
       }
       return incs
+  }
+
+  private File? searchHeaderFile(File self, Str name) {
+    f := self.parent + name.toUri
+    if (f.exists && !f.isDir) return f
+
+    return incDirs.eachWhile |p| {
+      f = p + name.toUri
+      if (f.exists && !f.isDir) return f
+      else return null
+    }
+  }
+
+  private Bool isDirty(File srcFile, DateTime time) {
+    dirty := fileDirtyMap[srcFile]
+    if (dirty != null) {
+      return dirty
+    }
+
+    if (srcFile.modified >= time) {
+      fileDirtyMap[srcFile] = true
+      //echo("$srcFile dirty")
+      return true
+    }
+    fileDirtyMap[srcFile] = false
+
+    lines := srcFile.readAllLines
+    for (i:=0; i<lines.size; ++i) {
+      f := lines[i].trim
+      if (!f.startsWith("#include")) {
+        continue
+      }
+      f = f["#include".size..-1].trim
+      if (f.size > 2 && f[0] == '\"' && f[f.size-1] == '\"') {
+        f = f[1..-2]
+        depend := searchHeaderFile(srcFile, f)
+        if (depend == null) {
+          log.err("not found include file: $f, in: $srcFile")
+          continue
+        }
+        if (isDirty(depend, time)) {
+          fileDirtyMap[srcFile] = true
+          return true
+        } else {
+          //echo("$depend ok")
+        }
+      }
+    }
+    return false
   }
 
 //////////////////////////////////////////////////////////////////////////
