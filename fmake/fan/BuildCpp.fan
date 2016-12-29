@@ -33,7 +33,7 @@ abstract class BuildCpp : BuildScript
   **
   ** is debug mode
   **
-  Bool debug := false
+  Str debug := "release"
 
   **
   ** default following fantom version
@@ -41,7 +41,7 @@ abstract class BuildCpp : BuildScript
   Version version := Version(config("buildVersion", "0"))
 
   **
-  ** depends lib
+  ** depends libs
   **
   Str[] depends := [,]
 
@@ -59,20 +59,20 @@ abstract class BuildCpp : BuildScript
   **
   ** List of ext libraries to link to.
   **
-  Str[] libs := [,]
+  Str[] extLibs := [,]
 
   **
   ** preproccess macro define
   **
-  Str[] define := [,]
+  Str[] defines := [,]
 
   **
   ** List of ext include the head file
   **
-  Uri[] includeDirs := [,]
+  Uri[] extIncDirs := [,]
 
-  ** List of lib dir
-  Uri[] libDirs := [,]
+  ** List of ext lib dirs
+  Uri[] extLibDirs := [,]
 
   **
   ** res will be copy to output directly
@@ -80,9 +80,19 @@ abstract class BuildCpp : BuildScript
   Uri[]? resDirs := null
 
   **
-  ** output
+  ** platform depends configs item
+  **
+  Str:Str extConfigs := [:]
+
+  **
+  ** output, default to Env.workDir
   **
   Uri outDir := Env.cur.workDir.plus(`lib/cpp/`).uri
+
+  **
+  ** compiler name
+  **
+  Str compiler := config("compiler", "gcc")
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -125,30 +135,22 @@ abstract class BuildCpp : BuildScript
     log.info("compile [${scriptDir.name}]")
     log.indent
 
-    extLibs := libs
-    extLib := this.config("libs")
-    if (extLib != null) {
-      extLibs.addAll(extLib.split)
+    compHome := config(compiler+".home", "")
+
+    allLibDirs := this.resolveDirs(extLibDirs)
+    configLibDir := this.config("libDirs")
+    if (configLibDir != null) {
+      allLibDirs.addAll(this.resolveDirs(configLibDir.split(';').map{it.toUri}))
     }
 
-    extLibDirs := this.resolveDirs(libDirs)
-    extLibDir := this.config("libDirs")
-    if (extLibDir != null) {
-      extLibDirs.addAll(this.resolveDirs(extLibDir.split(';').map{it.toUri}))
+    allIncDirs := this.resolveDirs(extIncDirs)
+    configIncDir := this.config("incDirs")
+    if (configIncDir != null) {
+      allIncDirs.addAll(this.resolveDirs(configIncDir.split(';').map{it.toUri}))
     }
-
-    extIncludeDirs := this.resolveDirs(includeDirs)
-    extIncludeDir := this.config("includeDirs")
-    if (extIncludeDir != null) {
-      extIncludeDirs.addAll(this.resolveDirs(extIncludeDir.split(';').map{it.toUri}))
-    }
-
-    compiler := config("compiler", "gcc")
-    ccHomeConfig := config(compiler+".home")
-    ccHome := ccHomeConfig == null ? "" : ccHomeConfig.toUri.toFile.osPath + File.sep
 
     // compile source
-    cc := CppCompiler(this)
+    cc := CompileCpp(this)
     {
       it.outHome    = this.outDir.toFile
       it.outType    = this.outType
@@ -158,19 +160,21 @@ abstract class BuildCpp : BuildScript
       it.summary    = this.summary
       it.depends    = this.depends.map |s->Depend| { Depend.fromStr(s) }
       it.version    = this.version
-      it.src        = this.resolveDirs(srcDirs)
+      it.srcDirs    = this.resolveDirs(this.srcDirs)
       it.excludeSrc = this.excludeSrc
       it.scriptDir  = this.scriptDir
 
-      it.libName    = extLibs
-      it.libDir     = extLibDirs
-      it.includeDir = extIncludeDirs
-      it.compiler   = compiler
-      it.ccHome = ccHome
-      it.define = this.define
-      if(resDirs != null)
+      it.extLibs    = this.extLibs
+      it.extLibDirs = allLibDirs
+      it.extIncDirs = allIncDirs
+      it.compiler   = this.compiler
+      it.compHome = compHome
+      it.defines = this.defines
+      it.extConfigs = this.extConfigs
+
+      if(this.resDirs != null)
       {
-        it.res = this.resolveDirs(resDirs)
+        it.resDirs = this.resolveDirs(this.resDirs)
       }
     }
 
