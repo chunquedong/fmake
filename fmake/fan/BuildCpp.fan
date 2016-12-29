@@ -80,7 +80,7 @@ abstract class BuildCpp : BuildScript
   Uri[]? resDirs := null
 
   **
-  ** platform depends configs item
+  ** platform depends configs item. such as 'cppflags' 'cflags'
   **
   Str:Str extConfigs := [:]
 
@@ -124,6 +124,21 @@ abstract class BuildCpp : BuildScript
 // Compile
 //////////////////////////////////////////////////////////////////////////
 
+  Uri[] allDirs(Uri dir)
+  {
+    Uri base := scriptDir.uri
+    Uri[] subs := [,]
+    (base + dir).toFile.walk |File f|
+    {
+      if(f.isDir)
+      {
+        rel := f.uri.relTo(base)
+        subs.add(rel)
+      }
+    }
+    return subs
+  }
+
   **
   ** Compile C++ source into exe or dll
   **
@@ -148,6 +163,12 @@ abstract class BuildCpp : BuildScript
     if (configIncDir != null) {
       allIncDirs.addAll(this.resolveDirs(configIncDir.split(';').map{it.toUri}))
     }
+    allIncDirs.addAll(this.resolveDirs(srcDirs))
+
+    allSrcDirs := [,]
+    srcDirs.each {
+      allSrcDirs.addAll(allDirs(it))
+    }
 
     // compile source
     cc := CompileCpp(this)
@@ -160,7 +181,7 @@ abstract class BuildCpp : BuildScript
       it.summary    = this.summary
       it.depends    = this.depends.map |s->Depend| { Depend.fromStr(s) }
       it.version    = this.version
-      it.srcDirs    = this.resolveDirs(this.srcDirs)
+      it.srcDirs    = this.resolveDirs(allSrcDirs)
       it.excludeSrc = this.excludeSrc
       it.scriptDir  = this.scriptDir
 
