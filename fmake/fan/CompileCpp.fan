@@ -226,7 +226,7 @@ class CompileCpp : Task
   {
     cmd := configs[compiler+"."+name]
     cmd = script.applyMacros(cmd, configs)
-    cmd += compHome.replace(" ", "::")
+    cmd = compHome.replace(" ", "::") + cmd
 
     cmds := cmd.split.map { it.replace("::", " ") }
     try {
