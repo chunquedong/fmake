@@ -310,7 +310,14 @@ class CompileCpp : Task
     }
     fileDirtyMap[srcFile] = false
 
-    lines := srcFile.readAllLines
+    Str[] lines := [,]
+    try {
+      lines = srcFile.readAllLines
+    } catch (Err e) {
+      log.warn("read file error: $srcFile")
+      return true
+    }
+
     for (i:=0; i<lines.size; ++i) {
       f := lines[i].trim
       if (!f.startsWith("#include")) {
@@ -321,7 +328,7 @@ class CompileCpp : Task
         f = f[1..-2]
         depend := searchHeaderFile(srcFile, f)
         if (depend == null) {
-          log.err("not found include file: $f, in: $srcFile")
+          log.warn("not found include file: $f, in: $srcFile")
           continue
         }
         if (isDirty(depend, time)) {
