@@ -51,6 +51,9 @@ class BuildCpp : BuildScript
   **
   Uri[] srcDirs := [`cpp/`]
 
+
+  Uri incDir := ``
+
   **
   ** exclude src file name
   **
@@ -149,7 +152,9 @@ class BuildCpp : BuildScript
     if (configIncDir != null) {
       allIncDirs.addAll(this.resolveDirs2(configIncDir.split(';').map{it.toUri}))
     }
-    allIncDirs.addAll(this.resolveDirs2(srcDirs))
+
+    incFile := this.resolveDirs2([incDir])[0]
+    allIncDirs.add(incFile)
 
     allSrcDirs := [,]
     srcDirs.each {
@@ -169,6 +174,7 @@ class BuildCpp : BuildScript
       it.version    = this.version
       it.srcDirs    = this.resolveDirs2(allSrcDirs)
       it.excludeSrc = this.excludeSrc
+      it.includeDir = incFile
       it.scriptDir  = this.scriptDir
 
       it.extLibs    = this.extLibs

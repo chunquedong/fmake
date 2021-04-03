@@ -1,9 +1,9 @@
 
-#include "helloLib/hello.h"
 
+#include "hello.h"
 
 int main() {
-  cout << s.c_str() << endl; // prints Hello World!!!
+  cout << getStr() << endl; // prints Hello World!!!
   return 0;
 }
 

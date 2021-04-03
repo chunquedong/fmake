@@ -1,4 +1,6 @@
 
 #include "hello.h"
 
-string s = "Hello World!!!";
+std::string getStr() {
+	return "Hello World!!!";
+}

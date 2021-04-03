@@ -4,5 +4,7 @@ summary = test lib
 outType = lib
 version = 1.0.0
 srcDirs = cpp/
+incDir = cpp/
 resDirs = res/
+debug = true
 

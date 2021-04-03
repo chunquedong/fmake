@@ -57,6 +57,9 @@ class Main
     //get srcDirs
     build.srcDirs.addAll(parseDirs(props.get(os+"srcDirs"), [,]))
 
+    includeDir := props.get(os+"incDir")
+    if (includeDir != null) build.incDir = includeDir.toUri
+
     //get resDirs    
     resDirs := parseDirs(props.get(os+"resDirs"))
     if (resDirs != null) {
@@ -71,7 +74,7 @@ class Main
     if (outType != null) build.outType = TargetType.fromStr(outType)
 
     debug := props.get(os+"debug")
-    if (debug != null) build.debug = "release"
+    if (debug != null) build.debug = "debug"
 
     build.extLibs.addAll(props.get(os+"extLibs", "").split(','))
     build.defines.addAll(props.get(os+"defines", "").split(','))
@@ -90,16 +93,29 @@ class Main
   **
   ** mini build for boost
   **
-  virtual Int main(Str[] args)
+  Int run(Str[] args)
   {
     build = BuildCpp()
-    scriptFile = args.last.toUri.toFile.normalize
+    Str[]? nargs
+    arg := args.first
+    if (arg == null || !arg.endsWith(".props")) {
+      arg = "fmake.props"
+      nargs = args
+    }
+    else {
+      nargs = args[1..-1]
+    }
+
+    scriptFile = arg.toUri.toFile.normalize
     props := scriptFile.in.readProps
     parse("", props)
     parse(Env.cur.os+".", props)
-    nargs := args.dup
-    nargs.pop
+
     return build.main(nargs)
+  }
+
+  static Int main() {
+    return Main().run(Env.cur.args)
   }
 
   static Uri[] allDir(Uri base, Uri dir)

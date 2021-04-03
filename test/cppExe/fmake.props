@@ -4,4 +4,7 @@ name = helloExe
 summary = test exe
 outType = exe
 srcDirs = cpp/
+incDir = cpp/
 depends = helloLib 1.0.0
+debug = true
+

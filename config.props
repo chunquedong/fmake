@@ -4,10 +4,10 @@ msvc.incDirs=[/I@{incDirs}]
 msvc.libNames=[@{libNames}]
 msvc.objList=[@{objList}]
 
-msvc.flags@{debug}= /DDEBUG
-msvc.flags@{release}= /O2
+msvc.flags@{debug}= /DDEBUG /MDd
+msvc.flags@{release}= /O2 /MD
 
-msvc.comp=cl /c /TP /EHsc /nologo /MD /DWIN32 /D_WINDOWS @{msvc.flags} @{msvc.defines} @{msvc.incDirs} /Fo@{objFile} @{srcFile}
+msvc.comp=cl /c /TP /EHsc /nologo /DWIN32 /D_WINDOWS @{msvc.flags} @{msvc.defines} @{msvc.incDirs} /Fo@{objFile} @{srcFile}
 msvc.lib=lib /OUT:@{outFile}.lib @{msvc.objList}
 msvc.exe=link /NOLOGO @{msvc.libDirs} /OUT:@{outFile}.exe @{msvc.libNames} @{msvc.objList}
 msvc.dll=link /NOLOGO /DLL @{msvc.libDirs} /OUT:@{outFile}.dll @{msvc.libList} @{msvc.objList}

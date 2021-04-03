@@ -61,6 +61,9 @@ class CompileCpp : Task
   ** List of source files or directories to compile
   File[] srcDirs
   Regex? excludeSrc := null
+
+  File? includeDir
+
   File? scriptDir
 
   ** List of resource
@@ -143,7 +146,7 @@ class CompileCpp : Task
   ** init. since dump test
   protected Void init()
   {
-    outPodDir = outHome + ("$name-$version/").toUri
+    outPodDir = outHome + ("$name-$version-$debug/").toUri
     outPodDir.create
 
     Uri dir := (outType == TargetType.exe) ? `bin/` : `lib/`
@@ -286,7 +289,7 @@ class CompileCpp : Task
       //depends include
       depends.each
       {
-        dep := outHome + `${it.name}-${it.version}/include/`
+        dep := outHome + `${it.name}-${it.version}-${debug}/include/`
         if (!dep.exists) throw fatal("don't find the depend $it")
         incs.add(dep)
       }
@@ -360,7 +363,7 @@ class CompileCpp : Task
       //depend libs
       depends.each
       {
-        dep := outHome + `${it.name}-${it.version}/lib/`
+        dep := outHome + `${it.name}-${it.version}-${debug}/lib/`
         count := 0
         dep.listFiles.each
         {
@@ -398,7 +401,7 @@ class CompileCpp : Task
       //depend libs path
       list := extLibDirs.dup
       depends.each {
-        dep := outHome + `${it.name}-${it.version}/lib/`
+        dep := outHome + `${it.name}-${it.version}-${debug}/lib/`
         list.add(dep)
       }
       return list
@@ -419,8 +422,8 @@ class CompileCpp : Task
 
     if (outType != TargetType.exe) {
       //copy include files
-      includeDir := (outPodDir + `include/$name/`).create
-      copyInto(srcDirs, includeDir, true,
+      dstIncludeDir := (outPodDir + `include/`).create
+      copyInto([this.includeDir], dstIncludeDir, true,
         [
           "overwrite":true,
           "exclude":|File f->Bool|
@@ -442,7 +445,7 @@ class CompileCpp : Task
     {
       if (f.isDir && flatten)
       {
-        f.listFiles.each
+        f.list.each
         {
           it.copyInto(dir, options)
         }

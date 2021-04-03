@@ -4,4 +4,4 @@
 
 using namespace std;
 
-extern string s;
+std::string getStr();
