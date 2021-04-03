@@ -14,6 +14,8 @@ Build from source:
 
 ### Setting
 
+The default configure is validate for gcc.
+
 1. Setting compiler
 fanx/etc/fmake/config.props:
 ```
@@ -39,9 +41,9 @@ build script 'fmake.props':
   debug = true
 ```
 compile:
-``
+```
   fan fmake -f
-``
+```
 
 generate project
 ```
