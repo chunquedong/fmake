@@ -6,23 +6,11 @@
 //   2011-4-3  Jed Young  Creation
 //
 
-using build
-
 **
 ** Run the Cpp compiler
 **
-class CompileCpp : Task
+class CompileCpp
 {
-
-  ** Output repository
-  File outHome
-
-  ** lib name
-  Str name
-
-  ** description of pod
-  Str summary
-
   ** output file name
   private File? outFile
 
@@ -30,78 +18,55 @@ class CompileCpp : Task
   private File? outPodDir
 
   ** output file dir
-  private File? outDir
+  private File? outBinDir
 
   private File? objDir
 
-  ** lib depends
-  Depend[] depends
-
-  ** lib depends
-  Version version
-
-  ** Output target type
-  TargetType outType
-
-  ** is debug mode
-  Str debug
-
-  ** List of ext librarie to link in
-  Str[] extLibs
-
-  ** List of macro define
-  Str[] defines
-
-  ** List of include
-  File[] extIncDirs
-
-  ** List of lib dir
-  File[] extLibDirs
-
-  ** List of source files or directories to compile
-  File[] srcDirs
-  Regex? excludeSrc := null
-
-  File? includeDir
-
-  File? scriptDir
-
-  ** List of resource
-  File[]? resDirs := null
-
-  ** Home directory for VC or GCC
-  ** configured via config prop
-  Str compHome
+  private BuildCpp buildInfo
 
   ** meta data
   private [Str:Str]? meta
 
-  ** compiler
+  ** compiler name
   Str compiler
 
-  Str:Str extConfigs
+  ** compiler home
+  Str compHome
 
+  ** configs.props
   private [Str:Str]? configs
 
   private [File:Bool] fileDirtyMap := [:]
 
+  private Log log := Log.get("fmake")
+
   ** ctor
-  new make(BuildScript script, |This| f)
-    : super(script)
+  new make(BuildCpp buildInfo)
   {
-    f(this)
+    this.buildInfo = buildInfo
+    compiler = config("compiler", "gcc")
+    compHome = config(compiler+".home", "")
+    outPodDir = (buildInfo.outDir + ("$buildInfo.name-$buildInfo.version-$buildInfo.debug/").toUri).toFile
   }
 
 //////////////////////////////////////////////////////////////////////////
 // Run
 //////////////////////////////////////////////////////////////////////////
+  **
+  ** Log an error and return a FatalBuildErr instance
+  **
+  Err fatal(Str msg, Err? err := null)
+  {
+    log.err(msg, err)
+    return Err(msg, err)
+  }
 
   **
   ** Run the cc task
   **
-  override Void run()
+  Void run()
   {
-    log.info("CompileCpp")
+    log.info("compile [${buildInfo.scriptDir.name}] $compiler")
 
     try {
       init
@@ -110,13 +75,14 @@ class CompileCpp : Task
       throw fatal("CompileCpp init failed", e)
     }
 
-    srcList.each |srcFile| {
+    buildInfo.sources.each |srcFile| {
       //echo("touch $srcFile")
-      configs["srcFile"] = fileToStr(srcFile)
-      objName := srcFile.pathStr.replace(scriptDir.pathStr, "")
+      configs["srcFile"] = fileToStr(srcFile.toFile)
+      objName := srcFile.pathStr.replace(buildInfo.scriptDir.pathStr, "")
       objFile := objDir+(objName+".o").toUri
       if (objFile.exists && !objFile.isDir) {
-        if (!isDirty(srcFile, objFile.modified - 1sec)) {
+        if (!isDirty(srcFile.toFile, objFile.modified - 1sec)) {
+          //echo("pass $srcFile $objFile")
           return
         }
       }
@@ -131,36 +97,47 @@ class CompileCpp : Task
       exeCmd("comp")
     }
 
-    if (outType == TargetType.lib)
+    if (buildInfo.outType == TargetType.lib)
       exeCmd("lib", objDir)
     else
-      exeCmd(outType == TargetType.dll ? "dll" : "exe", objDir)
+      exeCmd(buildInfo.outType == TargetType.dll ? "dll" : "exe", objDir)
 
     install
+
+    log.info("BUILD SUCCESS")
   }
 
   static Str fileToStr(File f) {
     f.osPath.replace(" ", "::")
   }
 
+  Str? config(Str name, Str? def := null)
+  {
+    Env.cur.vars["FAN_BUILD_$name.upper"] ?:
+    Env.cur.config(this.typeof.pod, name, def)
+  }
+
+  Void clean() {
+    outPodDir.delete
+  }
+
   ** init. since dump test
   protected Void init()
   {
-    outPodDir = outHome + ("$name-$version-$debug/").toUri
     outPodDir.create
 
-    Uri dir := (outType == TargetType.exe) ? `bin/` : `lib/`
-    outDir = (outPodDir + dir).create
-    outFile = (outDir + name.toUri)
-    outLibFile := (outDir +("lib"+name).toUri)
+    Uri dir := (buildInfo.outType == TargetType.exe) ? `bin/` : `lib/`
+    outBinDir = (outPodDir + dir).create
+    outFile = (outBinDir + buildInfo.name.toUri)
+    outLibFile := (outBinDir +("lib"+buildInfo.name).toUri)
     objDir = (outPodDir + `obj/`).create
 
     meta =
     [
-      "pod.name" : name,
-      "pod.version" : version.toStr,
-      "pod.depends" : depends.map { it.toStr } ->join(";"),
-      "pod.summary" : summary,
+      "pod.name" : buildInfo.name,
+      "pod.version" : buildInfo.version.toStr,
+      "pod.depends" : buildInfo.depends.map { it.toStr } ->join(";"),
+      "pod.summary" : buildInfo.summary,
       "pod.buildTime" : DateTime.now.toStr,
       "pod.compiler" : compiler
     ]
@@ -170,22 +147,22 @@ class CompileCpp : Task
     configs["outLibFile"] = fileToStr(outLibFile)
     configs["cflags"] = ""
     configs["cppflags"] = ""
-    configs.setAll(extConfigs)
+    configs.setAll(buildInfo.extConfigs)
 
     params := [Str:Str[]][:]
-    params["libNames"] = libNames
-    params["defines"] = defines
-    params["incDirs"] = incDirs.map { fileToStr(it) }
-    params["libDirs"] = libDirs.map { fileToStr(it) }
+    params["libNames"] = buildInfo.libs
+    params["defines"] = buildInfo.defines
+    params["incDirs"] = buildInfo.incDirs.map { fileToStr(it.toFile) }
+    params["libDirs"] = buildInfo.libDirs.map { fileToStr(it.toFile) }
 
-    scriptPath := scriptDir.pathStr
-    params["objList"] = srcList.map |f| {
+    scriptPath := buildInfo.scriptDir.pathStr
+    params["objList"] = buildInfo.sources.map |f| {
       path := f.pathStr.replace(scriptPath, "")
       return fileToStr((path+".o").toUri.toFile)
     }
 
     applayMacrosForList(params)
-    selectMacros(debug)
+    selectMacros(buildInfo.debug)
     fileDirtyMap.clear
   }
 
@@ -225,22 +202,55 @@ class CompileCpp : Task
     }
   }
 
+    **
+  ** Apply a set of macro substitutions to the given pattern.
+  ** Substitution keys are indicated in the pattern using "@{key}"
+  ** and replaced by definition in macros map.  If a substitution
+  ** key is undefined then raise an exception.  The `configs`
+  ** method is used for default macro key/value map.
+  **
+  Str applyMacros(Str pattern, [Str:Str] macros := this.configs)
+  {
+    // short circuit if we don't have @
+    at := pattern.index("@")
+    if (at == null) return pattern
+
+    // rebuild string
+    s := pattern
+    for (i:=0; i<s.size-3; ++i)
+    {
+      if (s[i] == '@' && s[i+1] == '{')
+      {
+        c := s.index("}", i+2)
+        if (c == null) throw Err("Unclosed macro: $pattern")
+        key := s[i+2..<c]
+        val := macros[key]
+        if (val == null) throw Err("Undefined macro key: $key")
+        s = s[0..<i] + val + s[c+1..-1]
+      }
+    }
+    return s
+  }
+
   private Void exeCmd(Str name, File? dir := null)
   {
     cmd := configs[compiler+"."+name]
-    cmd = script.applyMacros(cmd, configs)
+    cmd = applyMacros(cmd, configs)
     cmd = compHome.replace(" ", "::") + cmd
 
     cmds := cmd.split.map { it.replace("::", " ") }
     try {
-      e := Exec(script, cmds, dir)
-      inc := script.config("env.include")
-      lib := script.config("env.lib")
+      process := Process(cmds, dir)
+      inc := config("env.include")
+      lib := config("env.lib")
       if (inc != null)
-        e.process.env["INCLUDE"] = inc.split(';').map{it.toUri.toFile.osPath}.join(";")
+        process.env["INCLUDE"] = inc.split(';').map{it.toUri.toFile.osPath}.join(";")
       if (lib != null)
-        e.process.env["LIB"] = lib.split(';').map{it.toUri.toFile.osPath}.join(";")
-      e.run
+        process.env["LIB"] = lib.split(';').map{it.toUri.toFile.osPath}.join(";")
+      
+      log.info("Exec $cmds")
+      result := process.run.join
+      if (result != 0) throw fatal("Exec failed [$cmd]")
     } catch (Err err) {
       throw fatal(cmds.join(" "), err)
     }
@@ -250,58 +260,12 @@ class CompileCpp : Task
 // Compile
 //////////////////////////////////////////////////////////////////////////
 
-  protected once File[] srcList()
-  {
-      File[] srcs := [,]
-      srcDirs.each |File f| {
-        if (f.isDir){
-          f.listFiles.each {
-            ext := it.ext
-            if (ext == "cpp" || ext == "c" || ext == "cc" || ext == "cxx") {
-              if (excludeSrc != null) {
-                if (!excludeSrc.matches(it.name)) {
-                  srcs.add(it)
-                }
-              }
-              else {
-                srcs.add(it)
-              }
-            }
-          }
-        } else {
-          srcs.add(f)
-        }
-      }
-      return srcs
-  }
-
-  protected once File[] incDirs()
-  {
-      File[] incs := extIncDirs.dup
-      /*
-      srcDirs.each |File f| {
-        if (f.isDir) {
-          incs.add(f)
-        }
-      }*/
-      incs.add(scriptDir)
-
-      //depends include
-      depends.each
-      {
-        dep := outHome + `${it.name}-${it.version}-${debug}/include/`
-        if (!dep.exists) throw fatal("don't find the depend $it")
-        incs.add(dep)
-      }
-      return incs
-  }
-
   private File? searchHeaderFile(File self, Str name) {
     f := self.parent + name.toUri
     if (f.exists && !f.isDir) return f
 
-    return incDirs.eachWhile |p| {
-      f = p + name.toUri
+    return buildInfo.incDirs.eachWhile |p| {
+      f = p.toFile + name.toUri
       if (f.exists && !f.isDir) return f
       else return null
     }
@@ -353,61 +317,6 @@ class CompileCpp : Task
   }
 
 //////////////////////////////////////////////////////////////////////////
-// Link
-//////////////////////////////////////////////////////////////////////////
-
-  protected once Str[] libNames()
-  {
-      Str[] libs := [,]
-
-      //depend libs
-      depends.each
-      {
-        dep := outHome + `${it.name}-${it.version}-${debug}/lib/`
-        count := 0
-        dep.listFiles.each
-        {
-          if (it.ext == "lib" || it.ext == "a" || it.ext == "so")
-          {
-            if (it.name.startsWith("lib") && it.name.endsWith(".a"))
-            {
-              i := it.name.indexr(".a")
-              libs.add(it.name[3..<i])
-            }
-            else if (it.name.startsWith("lib") && it.name.endsWith(".so"))
-            {
-              i := it.name.indexr(".so")
-              libs.add(it.name[3..<i])
-            }
-            else
-              libs.add(it.name)
-            count++
-          }
-        }
-        if (count == 0)
-          throw fatal("don't find any lib in ${it.name}-${it.version}/lib/")
-      }
-
-      //user libs
-      extLibs.each
-      {
-        libs.add(it)
-      }
-      return libs
-  }
-
-  protected once File[] libDirs()
-  {
-      //depend libs path
-      list := extLibDirs.dup
-      depends.each {
-        dep := outHome + `${it.name}-${it.version}-${debug}/lib/`
-        list.add(dep)
-      }
-      return list
-  }
-
-//////////////////////////////////////////////////////////////////////////
 // install
 //////////////////////////////////////////////////////////////////////////
 
@@ -416,14 +325,14 @@ class CompileCpp : Task
   **
   Void install()
   {
-    if (resDirs != null) {
-      copyInto(resDirs, outDir, false, ["overwrite":true])
+    if (buildInfo.resDirs.size > 0) {
+      copyInto(buildInfo.resDirs, outBinDir, false, ["overwrite":true])
     }
 
-    if (outType != TargetType.exe) {
+    if (buildInfo.outType != TargetType.exe) {
       //copy include files
       dstIncludeDir := (outPodDir + `include/`).create
-      copyInto([this.includeDir], dstIncludeDir, true,
+      copyInto([buildInfo.includeDir], dstIncludeDir, true,
         [
           "overwrite":true,
           "exclude":|File f->Bool|
@@ -439,10 +348,11 @@ class CompileCpp : Task
     log.info("outFile: " + (outFile).osPath)
   }
 
-  private Void copyInto(File[] src, File dir, Bool flatten, [Str:Obj]? options := null)
+  private static Void copyInto(Uri[] src, File dir, Bool flatten, [Str:Obj]? options := null)
   {
-    src.each |File f|
+    src.each |uri|
     {
+      f := uri.toFile
       if (f.isDir && flatten)
       {
         f.list.each
