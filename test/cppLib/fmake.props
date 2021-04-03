@@ -1,0 +1,8 @@
+
+name = helloLib
+summary = test lib
+outType = lib
+version = 1.0.0
+srcDirs = cpp/
+resDirs = res/
+

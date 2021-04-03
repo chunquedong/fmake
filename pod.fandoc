@@ -19,29 +19,23 @@ The default configure is validate for gcc compiler.
 1. Config Compiler
 FANTOM_HOME/etc/build/config.props:
   compiler=msvc
-  msvc.home=/C:/Program Files/Microsoft Visual Studio 9.0/VC/bin/
-  incDirs=/C:/Program Files/Microsoft SDKs/Windows/v6.0A/include/;/C:/Program Files/Microsoft Visual Studio 9.0/VC/include/
-  libDirs=/C:/Program Files/Microsoft Visual Studio 9.0/VC/lib/;/C:/Program Files/Microsoft SDKs/Windows/v6.0A/lib/
+  msvc.home=/D:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.28.29333/bin/Hostx64/x64/
+  env.include=/D:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.28.29333/include/;/C:/Program Files (x86)/Windows Kits/10/Include/10.0.18362.0/ucrt/
+  env.lib=/D:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.28.29333/lib/x64/;/C:/Program Files (x86)/Windows Kits/10/Lib/10.0.18362.0/ucrt/x64/;/C:/Program Files (x86)/Windows Kits/10/Lib/10.0.18362.0/um/x64/
 
-2. Add Env path: C:\Program Files\Microsoft Visual Studio 9.0\Common7\IDE;
+2. Add Env path: D:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE;
 
 Usage[#usage]
 =============
+build script 'fmake.props':
+  name = helloExe
+  summary = test exe
+  outType = exe
+  srcDirs = cpp/
+  depends = helloLib 1.0.0
 
-  using fmake
-
-  class Build : BuildCpp
-  {
-    new make()
-    {
-      name = "helloExe"
-      summary = "test exe"
-      outType = TargetType.exe
-
-      srcDirs = [`cpp/`]
-      depends = ["helloLib 1.0.0"]
-    }
-  }
+run:
+  fan fmake fmake.props
 
 Repository [#repository]
 =============

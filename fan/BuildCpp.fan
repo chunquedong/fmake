@@ -8,7 +8,7 @@
 
 using build
 
-abstract class BuildCpp : BuildScript
+class BuildCpp : BuildScript
 {
 
 //////////////////////////////////////////////////////////////////////////
@@ -138,18 +138,18 @@ abstract class BuildCpp : BuildScript
 
     compHome := config(compiler+".home", "")
 
-    allLibDirs := this.resolveDirs(extLibDirs)
+    allLibDirs := this.resolveDirs2(extLibDirs)
     configLibDir := this.config("libDirs")
     if (configLibDir != null) {
-      allLibDirs.addAll(this.resolveDirs(configLibDir.split(';').map{it.toUri}))
+      allLibDirs.addAll(this.resolveDirs2(configLibDir.split(';').map{it.toUri}))
     }
 
-    allIncDirs := this.resolveDirs(extIncDirs)
+    allIncDirs := this.resolveDirs2(extIncDirs)
     configIncDir := this.config("incDirs")
     if (configIncDir != null) {
-      allIncDirs.addAll(this.resolveDirs(configIncDir.split(';').map{it.toUri}))
+      allIncDirs.addAll(this.resolveDirs2(configIncDir.split(';').map{it.toUri}))
     }
-    allIncDirs.addAll(this.resolveDirs(srcDirs))
+    allIncDirs.addAll(this.resolveDirs2(srcDirs))
 
     allSrcDirs := [,]
     srcDirs.each {
@@ -167,7 +167,7 @@ abstract class BuildCpp : BuildScript
       it.summary    = this.summary
       it.depends    = this.depends.map |s->Depend| { Depend.fromStr(s) }
       it.version    = this.version
-      it.srcDirs    = this.resolveDirs(allSrcDirs)
+      it.srcDirs    = this.resolveDirs2(allSrcDirs)
       it.excludeSrc = this.excludeSrc
       it.scriptDir  = this.scriptDir
 
@@ -181,7 +181,7 @@ abstract class BuildCpp : BuildScript
 
       if(this.resDirs != null)
       {
-        it.resDirs = this.resolveDirs(this.resDirs)
+        it.resDirs = this.resolveDirs2(this.resDirs)
       }
     }
 
@@ -228,7 +228,7 @@ abstract class BuildCpp : BuildScript
   **
   ** Resolve a set of URIs to files relative to scriptDir.
   **
-  internal File[] resolveFiles(Uri[] uris)
+  internal File[] resolveFiles2(Uri[] uris)
   {
     uris.map |uri->File|
     {
@@ -241,7 +241,7 @@ abstract class BuildCpp : BuildScript
   **
   ** Resolve a set of URIs to directories relative to scriptDir.
   **
-  internal File[] resolveDirs(Uri[] uris)
+  internal File[] resolveDirs2(Uri[] uris)
   {
     uris.map |uri->File|
     {
@@ -268,4 +268,108 @@ enum class TargetType
 
   ** static link library
   lib
+}
+
+
+class Main
+{
+
+  BuildCpp? build
+
+  private File? scriptFile
+
+//////////////////////////////////////////////////////////////////////////
+
+  private Uri[]? parseDirs(Str? str, Uri[]? defV := null) {
+    if (str == null) return defV
+    srcDirs := Uri[,]
+    str.split(',').each |d| {
+      if (d.endsWith("*")) {
+        srcUri := d[0..<-1].toUri
+        dirs := allDir(scriptFile.uri, srcUri)
+        srcDirs.addAll(dirs)
+      }
+      else {
+        srcDirs.add(d.toUri)
+      }
+    }
+    return srcDirs
+  }
+
+  private Void getStartsWith(Str str, [Str:Str] props, [Str:Str] map) {
+    props.each |v,k| {
+      if (k.startsWith(str)) {
+        k = k[str.size..-1]
+        map[k] = v
+      }
+    }
+  }
+
+  private Void parse([Str:Str] props) {
+    build->scriptFile = scriptFile
+
+    build.name = props.get("name")
+    build.summary = props.get("summary")
+
+    versionStr := props.get("version")
+    if (versionStr != null) build.version = Version(versionStr)
+
+    //get depends
+    props.get("depends", "").split(',').each { if (it.size>0) build.depends.add(it) }
+
+    //get srcDirs
+    //get srcDirs
+    build.srcDirs = parseDirs(props.get("srcDirs"), [,])
+    build.resDirs = parseDirs(props.get("resDirs"))
+    excludeSrc := props.get("excludeSrc")
+    if (excludeSrc != null) build.excludeSrc = Regex.fromStr(excludeSrc)
+
+    build.outType = TargetType.fromStr(props.get("outType"))
+    debug := props.get("debug")
+    if (debug != null) build.debug = "release"
+
+    build.extLibs = props.get("extLibs", "").split(',')
+    build.defines = props.get("defines", "").split(',')
+
+    build.extIncDirs = parseDirs(props.get("extIncDirs"), [,])
+    build.extLibDirs = parseDirs(props.get("extLibDirs"), [,])
+
+    //get outPodDir
+    outDir := props.get("outDir", null)
+    if (outDir != null) build.outDir = outDir.toUri
+
+    //get extConfigs
+    os := Env.cur.os
+    getStartsWith(os+".", props, build.extConfigs)
+
+  }
+
+  **
+  ** mini build for boost
+  **
+  virtual Int main(Str[] args)
+  {
+    build = BuildCpp()
+    scriptFile = args.last.toUri.toFile.normalize
+    props := scriptFile.in.readProps
+    parse(props)
+    nargs := args.dup
+    nargs.pop
+    return build.main(nargs)
+  }
+
+  static Uri[] allDir(Uri base, Uri dir)
+  {
+    Uri[] subs := [,]
+    (base + dir).toFile.walk |File f|
+    {
+      if(f.isDir)
+      {
+        rel := f.uri.relTo(base)
+        subs.add(rel)
+      }
+    }
+    return subs
+  }
+
 }

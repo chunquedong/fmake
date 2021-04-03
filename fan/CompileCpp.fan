@@ -230,7 +230,14 @@ class CompileCpp : Task
 
     cmds := cmd.split.map { it.replace("::", " ") }
     try {
-      Exec(script, cmds, dir).run
+      e := Exec(script, cmds, dir)
+      inc := script.config("env.include")
+      lib := script.config("env.lib")
+      if (inc != null)
+        e.process.env["INCLUDE"] = inc.split(';').map{it.toUri.toFile.osPath}.join(";")
+      if (lib != null)
+        e.process.env["LIB"] = lib.split(';').map{it.toUri.toFile.osPath}.join(";")
+      e.run
     } catch (Err err) {
       throw fatal(cmds.join(" "), err)
     }
@@ -297,7 +304,7 @@ class CompileCpp : Task
     }
   }
 
-  private Bool isDirty(File srcFile, DateTime time) {
+  private Bool isDirty(File srcFile, TimePoint time) {
     dirty := fileDirtyMap[srcFile]
     if (dirty != null) {
       return dirty

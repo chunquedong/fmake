@@ -9,14 +9,17 @@
 
 using build
 
-class Build : BuildGroup
+class Build : BuildPod
 {
   new make()
   {
-    childrenScripts =
+    podName = "fmake"
+    summary = "A Fantom style C++ build tool"
+    depends =
     [
-      `cppLib/build.fan`,
-      `cppExe/build.fan`,
+        "sys 2.0", "std 1.0", "build 1.0"
     ]
+    srcDirs = [`fan/`]
+    resDirs = [`config.props`]
   }
 }
