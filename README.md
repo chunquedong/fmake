@@ -3,16 +3,24 @@
 
 Declarative C++ build tool
 
+### Features
+
+- Declarative make file script
+- Cross-platform and support gcc msvc clang
+- Generate IDE project base on CMake
+- Dependency Package Management
+
+
 ### Install
 
-It's depends [Fanx runtime](https://github.com/fanx-dev/fanx/blob/master/doc/QuickStart.md).
+It depends on [Fanx runtime](https://github.com/fanx-dev/fanx/blob/master/doc/QuickStart.md).
 
 Build from source:
 ```
   fan build.fan
 ```
 
-### Setting
+### Setting on Windows
 
 The default configure is validate for gcc.
 
