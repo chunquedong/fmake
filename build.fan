@@ -17,7 +17,7 @@ class Build : BuildPod
     summary = "A Fantom style C++ build tool"
     depends =
     [
-        "sys 2.0", "std 1.0", "build 1.0"
+        "sys 2.0", "std 1.0"
     ]
     srcDirs = [`fan/`]
     resDirs = [`config.props`]

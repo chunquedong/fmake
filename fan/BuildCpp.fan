@@ -173,8 +173,10 @@ class BuildCpp
     build.sources.addAll(srcList(srcDirs, excludeSrcRegex))
 
     includeDir := props.get(os+"incDir")
-    if (includeDir != null) build.includeDir = includeDir.toUri
-
+    if (includeDir != null) {
+      build.includeDir = includeDir.toUri
+      build.incDirs.add(build.includeDir)
+    }
     //get resDirs
     resDirs := parseDirs(props.get(os+"resDirs"))
     if (resDirs != null) build.resDirs.addAll(resDirs)
@@ -183,7 +185,7 @@ class BuildCpp
     if (outType != null) build.outType = TargetType.fromStr(outType)
 
     debug := props.get(os+"debug")
-    if (debug != null) build.debug = "debug"
+    if (debug == "true") build.debug = "debug"
 
     extLibs := props.get(os+"extLibs")
     if (extLibs != null) build.libs.addAll(extLibs.split(','))

@@ -6,8 +6,8 @@ Declarative C++ build tool
 ### Features
 
 - Declarative make file script
-- Cross-platform and support gcc msvc clang
-- Generate IDE project base on CMake
+- Cross-platform and support gcc msvc
+- Generate Visual Studio and XCode project file
 - Dependency Package Management
 
 
@@ -21,15 +21,18 @@ Build from source:
 ```
 
 ### Setting on Windows
+1. Setting compiler (Options)
 
-The default configure is validate for gcc.
+The msvc and gcc is default compiler.
 
-1. Setting compiler
 fanx/etc/fmake/config.props:
 ```
-  compiler=msvc
+  compiler=clang
 ```
-2. Add Env vars
+
+2. Config Env Vars (Options)
+
+If you don't want to run comand line in 'Visual Studio Developer Command Prompt'.
 ```
   INCLUDE=D:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/
   LIB=D:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.28.29333/lib/x64/;C:/Program Files (x86)/Windows Kits/10/Lib/10.0.18362.0/ucrt/x64/;C:/Program Files (x86)/Windows Kits/10/
@@ -38,24 +41,52 @@ fanx/etc/fmake/config.props:
 
 ### Usage
 
+#### compile
+
 build script 'fmake.props':
 ```
   name = helloExe
   summary = test exe
+  version = 1.0.1
   outType = exe
   srcDirs = cpp/
-  incDir = cpp/
-  depends = helloLib 1.0.0
+  incDir = include/
+  depends = helloLib 1.0.0, abc 1.2
   debug = true
 ```
 compile:
 ```
+  fan fmake
+
+```
+clean and compile:
+```
   fan fmake -f
 ```
 
-generate project
+#### generate project
+require install cmake.
 ```
   fan fmake -G
+```
+
+#### build script detail
+
+```
+  name: name of lib
+  summary: discription
+  version: build version
+  outType: exe, lib, dll
+  srcDirs: input dir or file
+  excludeSrc: exclude regex in srcDirs scan
+  incDir: include dir to copy
+  resDirs: resource files to copy
+  depends: library with version
+  extIncDirs: extra include dirs
+  extLibDirs: extra library dirs
+  extLibs: extra depend library name
+  defines: user define macro
+  debug: is debug compile mode
 ```
 
 ### Package Repository
@@ -81,3 +112,7 @@ The defalut output to 'fanx/lib/cpp/'
         |...
 
 ````
+
+### Do More Task
+
+Please write shell script or fanx script.

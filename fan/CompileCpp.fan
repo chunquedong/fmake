@@ -44,7 +44,7 @@ class CompileCpp
   new make(BuildCpp buildInfo)
   {
     this.buildInfo = buildInfo
-    compiler = config("compiler", "gcc")
+    compiler = config("compiler", Env.cur.os == "win32" ? "msvc" : "gcc" )
     compHome = config(compiler+".home", "")
     outPodDir = (buildInfo.outDir + ("$buildInfo.name-$buildInfo.version-$buildInfo.debug/").toUri).toFile
   }
