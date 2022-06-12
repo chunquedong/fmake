@@ -89,6 +89,18 @@ require install cmake.
   debug: is debug compile mode
 ```
 
+#### platform-dependent configuration
+Prefix OS name
+- win32
+- macosx
+- linux
+
+```
+win32.extIncDirs = ...
+linux.define = ...
+```
+
+
 ### Package Repository
 
 The defalut output to 'fanx/lib/cpp/'
