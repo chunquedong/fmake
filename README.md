@@ -90,6 +90,18 @@ require install cmake.
   extConfigs.cppflags: compiler flags
 ```
 
+#### platform-dependent configuration
+Prefix OS name
+- win32
+- macosx
+- linux
+
+```
+win32.extIncDirs = ...
+linux.define = ...
+```
+
+
 ### Package Repository
 
 The defalut output to 'fanx/lib/cpp/'
