@@ -2,5 +2,7 @@
 #include "hello.h"
 
 std::string getStr() {
-	return "Hello World!!!";
+	std::string res = "Hello";
+	res += " World";
+	return res;
 }

@@ -7,4 +7,3 @@ srcDirs = cpp/
 incDir = cpp/
 resDirs = res/
 debug = true
-

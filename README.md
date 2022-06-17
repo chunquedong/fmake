@@ -77,9 +77,9 @@ require install cmake.
   summary: discription
   version: build version
   outType: exe, lib, dll
-  srcDirs: input dir or file
+  srcDirs: input directory or file
   excludeSrc: exclude regex in srcDirs scan
-  incDir: include dir to copy
+  incDir: include directory to copy
   resDirs: resource files to copy
   depends: library with version
   extIncDirs: extra include dirs
@@ -87,6 +87,7 @@ require install cmake.
   extLibs: extra depend library name
   defines: user define macro
   debug: is debug compile mode
+  extConfigs.cppflags: compiler flags
 ```
 
 ### Package Repository

@@ -11,14 +11,14 @@ class Main
   static Int main() {
     Str[] args = Env.cur.args
     Str[]? nargs
-    arg := args.last
+    arg := args.first
 
     if (arg == null || !arg.endsWith(".props")) {
       arg = "fmake.props"
       nargs = args
     }
     else {
-      nargs = args[0..<-1]
+      nargs = args[1..-1]
     }
 
     scriptFile := arg.toUri.toFile.normalize.uri

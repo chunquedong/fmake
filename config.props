@@ -4,8 +4,8 @@ msvc.incDirs=[/I@{incDirs}]
 msvc.libNames=[@{libNames}]
 msvc.objList=[@{objList}]
 
-msvc.flags@{debug}= /DDEBUG /MDd
-msvc.flags@{release}= /O2 /MD
+msvc.flags@{debug}= /DDEBUG /MDd @{cppflags} /Zi /Fd@{outFile}.pdb
+msvc.flags@{release}= /O2 /MD @{cppflags}
 
 msvc.comp=cl /c /EHsc /nologo /DWIN32 /D_WINDOWS @{msvc.flags} @{msvc.defines} @{msvc.incDirs} /Fo@{objFile} @{srcFile}
 msvc.lib=lib /OUT:@{outFile}.lib @{msvc.objList}

@@ -174,7 +174,7 @@ class BuildCpp
 
     includeDir := props.get(os+"incDir")
     if (includeDir != null) {
-      build.includeDir = includeDir.toUri
+      build.includeDir = scriptDir+includeDir.toUri
       build.incDirs.add(build.includeDir)
     }
     //get resDirs
@@ -197,10 +197,11 @@ class BuildCpp
 
     //get outPodDir
     outDir := props.get(os+"outDir", null)
-    if (outDir != null) build.outDir = outDir.toUri
-
+    if (outDir != null) {
+      build.outDir = outDir.toUri.toFile.normalize.uri
+    }
     //get extConfigs
-    getStartsWith(os+"extConfigs", props, build.extConfigs)
+    getStartsWith(os+"extConfigs.", props, build.extConfigs)
   }
 
   ** init devHomeDir

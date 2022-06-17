@@ -326,7 +326,7 @@ class CompileCpp
   Void install()
   {
     if (buildInfo.resDirs.size > 0) {
-      copyInto(buildInfo.resDirs, outBinDir, false, ["overwrite":true])
+      copyInto(buildInfo.resDirs, outPodDir, false, ["overwrite":true])
     }
 
     if (buildInfo.outType != TargetType.exe) {
