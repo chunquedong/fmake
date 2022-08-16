@@ -17,7 +17,7 @@ It depends on [Fanx runtime](https://github.com/fanx-dev/fanx/blob/master/doc/Qu
 
 Build from source:
 ```
-  fan build.fan
+  fanb pod.props
 ```
 
 ### Setting on Windows
@@ -52,22 +52,25 @@ build script 'fmake.props':
   srcDirs = cpp/
   incDir = include/
   depends = helloLib 1.0.0, abc 1.2
-  debug = true
 ```
 compile:
 ```
-  fan fmake
-
+  fan fmake fmake.props
+  
+```
+debug compile:
+```
+  fan fmake -d  fmake.props
 ```
 clean and compile:
 ```
-  fan fmake -f
+  fan fmake -f  fmake.props
 ```
 
 #### generate project
 require install cmake.
 ```
-  fan fmake -G
+  fan fmake -G  fmake.props
 ```
 
 #### build script detail
@@ -86,7 +89,6 @@ require install cmake.
   extLibDirs: extra library dirs
   extLibs: extra depend library name
   defines: user define macro
-  debug: is debug compile mode
   extConfigs.cppflags: compiler flags
 ```
 
@@ -95,6 +97,7 @@ Prefix OS name
 - win32
 - macosx
 - linux
+- non-win
 
 ```
 win32.extIncDirs = ...

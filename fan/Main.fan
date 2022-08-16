@@ -5,40 +5,49 @@
 // History:
 //   2021-4-3  Jed Young  Creation
 //
+using util
 
-class Main
+class Main : AbstractMain
 {
-  static Int main() {
-    Str[] args = Env.cur.args
-    Str[]? nargs
-    arg := args.first
+  @Opt { help = "force rebuild"; aliases=["f"] }
+  Bool force := false
 
-    if (arg == null || !arg.endsWith(".props")) {
-      arg = "fmake.props"
-      nargs = args
-    }
-    else {
-      nargs = args[1..-1]
+  @Opt { help = "generate project file"; aliases=["G"] }
+  Bool generate := false
+
+  @Opt { help = "dump build config"; }
+  Bool dump := false
+
+  @Opt { help = "debug build"; aliases=["d"] }
+  Bool debug := false
+
+  @Arg { help = "build script" }
+  File? scriptFile
+
+  override Int run() {
+    if (scriptFile == null) {
+      scriptFile = File.os("fmake.props")
     }
 
-    scriptFile := arg.toUri.toFile.normalize.uri
     build := BuildCpp()
-    build.parse(scriptFile)
+    if (debug) {
+      build.debug = "debug"
+    }
+    build.parse(scriptFile.normalize.uri)
 
-    if (nargs.first == "-G") {
+    if (generate) {
       Generator(build).run
     }
-    else if (nargs.first == "-dump") {
+    else if (dump) {
       build.dump
     }
     else {
       cc := CompileCpp(build)
-      if (nargs.first == "-f") {
+      if (force) {
         cc.clean
       }
       cc.run
     }
-
     return 0
   }
 }

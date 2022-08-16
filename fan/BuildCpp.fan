@@ -184,8 +184,8 @@ class BuildCpp
     outType := props.get(os+"outType")
     if (outType != null) build.outType = TargetType.fromStr(outType)
 
-    debug := props.get(os+"debug")
-    if (debug == "true") build.debug = "debug"
+    //debug := props.get(os+"debug")
+    //if (debug == "true") build.debug = "debug"
 
     extLibs := props.get(os+"extLibs")
     if (extLibs != null) build.libs.addAll(extLibs.split(','))
@@ -275,6 +275,9 @@ class BuildCpp
     scriptDir = scriptFile.parent
     props := scriptFile.toFile.in.readProps
     osParse("", props)
+    if (Env.cur.os != "win32") {
+      osParse("non-win", props)
+    }
     osParse(Env.cur.os+".", props)
 
     if (outDir == null) {

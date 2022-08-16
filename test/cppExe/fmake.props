@@ -6,7 +6,6 @@ outType = exe
 srcDirs = cpp/
 incDir = cpp/
 depends = helloLib 1.0.0
-debug = true
 defines = DEBUG=1
 extConfigs.cppflags = -std=c++11
 win32.extConfigs.cppflags = /std:c++14
