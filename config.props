@@ -10,7 +10,7 @@ msvc.flags@{release}= /O2 /MD @{cppflags}
 msvc.comp=cl /c /EHsc /nologo /DWIN32 /D_WINDOWS @{msvc.flags} @{msvc.defines} @{msvc.incDirs} /Fo@{objFile} @{srcFile}
 msvc.lib=lib /OUT:@{outFile}.lib @{msvc.objList}
 msvc.exe=link /NOLOGO @{msvc.libDirs} /OUT:@{outFile}.exe @{msvc.libNames} @{msvc.objList}
-msvc.dll=link /NOLOGO /DLL @{msvc.libDirs} /OUT:@{outFile}.dll @{msvc.libList} @{msvc.objList}
+msvc.dll=link /NOLOGO /DLL @{msvc.libDirs} /OUT:@{outFile}.dll @{msvc.libNames} @{msvc.objList}
 
 
 gcc.defines=[-D@{defines}]
@@ -27,5 +27,5 @@ gcc.name@{c}=gcc @{cflags}
 gcc.comp=@{gcc.name} -c -g -fPIC -fpermissive -Wall @{gcc.flags} @{gcc.defines} @{gcc.incDirs} -o @{objFile} @{srcFile}
 gcc.lib=ar -vcqs @{outLibFile}.a @{gcc.objList}
 gcc.exe=g++ -g -o @{outFile} @{gcc.objList} @{gcc.libDirs} @{gcc.libNames}
-gcc.dll=g++ -g -shared -o @{outLibFile}.so @{gcc.objList} @{gcc.libDirs} @{gcc.libList}
+gcc.dll=g++ -g -shared -o @{outLibFile}.so @{gcc.objList} @{gcc.libDirs} @{gcc.libNames}
 

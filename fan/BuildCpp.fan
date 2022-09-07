@@ -69,6 +69,12 @@ class BuildCpp
   ** ext compiler options
   Str:Str extConfigs := [:]
 
+  ** exclude src file by regex
+  Str? excludeSrc
+
+  ** src directories
+  Uri[] srcDirs := [,]
+
   Log log := Log.get("fmake")
 
 //////////////////////////////////////////////////////////////////////////
@@ -92,7 +98,8 @@ class BuildCpp
             ext := it.ext
             if (ext == "cpp" || ext == "c" || ext == "cc" || ext == "cxx") {
               if (excludeSrc != null) {
-                if (!excludeSrc.matches(it.name)) {
+                rel := it.uri.relTo(scriptDir)
+                if (!excludeSrc.matches(rel.toStr)) {
                   srcs.add(it.uri)
                 }
               }
@@ -167,10 +174,11 @@ class BuildCpp
 
     //get srcDirs
     srcDirs := parseDirs(props.get(os+"srcDirs"), [,])
-    Regex? excludeSrcRegex
     excludeSrc := props.get(os+"excludeSrc")
-    if (excludeSrc != null) excludeSrcRegex = Regex.fromStr(excludeSrc)
-    build.sources.addAll(srcList(srcDirs, excludeSrcRegex))
+    if (excludeSrc != null) {
+      build.excludeSrc = excludeSrc
+    }
+    build.srcDirs.addAll(srcDirs)
 
     includeDir := props.get(os+"incDir")
     if (includeDir != null) {
@@ -279,6 +287,9 @@ class BuildCpp
       osParse("non-win", props)
     }
     osParse(Env.cur.os+".", props)
+
+    excludeRegex := excludeSrc == null ? null : Regex.fromStr(excludeSrc)
+    this.sources.addAll(srcList(this.srcDirs, excludeRegex))
 
     if (outDir == null) {
       outDirFile := (getDevHomeDir + `lib/cpp/`)
