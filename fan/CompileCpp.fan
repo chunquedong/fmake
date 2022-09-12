@@ -75,36 +75,40 @@ class CompileCpp
       throw fatal("CompileCpp init failed", e)
     }
 
-    buildInfo.sources.each |srcFile| {
-      //echo("touch $srcFile")
-      configs["srcFile"] = fileToStr(srcFile.toFile)
-      objName := srcFile.pathStr.replace(buildInfo.scriptDir.pathStr, "")
-      objFile := objDir+(objName+".o").toUri
-      if (objFile.exists && !objFile.isDir) {
-        if (!isDirty(srcFile.toFile, objFile.modified - 1sec)) {
-          //echo("pass $srcFile $objFile")
-          return
+    try {
+      buildInfo.sources.each |srcFile| {
+        //echo("touch $srcFile")
+        configs["srcFile"] = fileToStr(srcFile.toFile)
+        objName := srcFile.pathStr.replace(buildInfo.scriptDir.pathStr, "")
+        objFile := objDir+(objName+".o").toUri
+        if (objFile.exists && !objFile.isDir) {
+          if (!isDirty(srcFile.toFile, objFile.modified - 1sec)) {
+            //echo("pass $srcFile $objFile")
+            return
+          }
         }
-      }
-      objFile.parent.create
-      configs["objFile"] = fileToStr(objFile)
+        objFile.parent.create
+        configs["objFile"] = fileToStr(objFile)
 
-      if (srcFile.ext == "c") {
-        selectMacros("c")
-      } else {
-        selectMacros("cpp")
+        if (srcFile.ext == "c") {
+          selectMacros("c")
+        } else {
+          selectMacros("cpp")
+        }
+        exeCmd("comp")
       }
-      exeCmd("comp")
+
+      if (buildInfo.outType == TargetType.lib)
+        exeCmd("lib", objDir)
+      else
+        exeCmd(buildInfo.outType == TargetType.dll ? "dll" : "exe", objDir)
+
+      install
+
+      log.info("BUILD SUCCESS")
+    } catch (Err e) {
+      log.info("BUILD FAIL")
     }
-
-    if (buildInfo.outType == TargetType.lib)
-      exeCmd("lib", objDir)
-    else
-      exeCmd(buildInfo.outType == TargetType.dll ? "dll" : "exe", objDir)
-
-    install
-
-    log.info("BUILD SUCCESS")
   }
 
   static Str fileToStr(File f) {
@@ -239,21 +243,19 @@ class CompileCpp
     cmd = compHome.replace(" ", "::") + cmd
 
     cmds := cmd.split.map { it.replace("::", " ") }
-    try {
-      process := Process(cmds, dir)
-      inc := config("env.include")
-      lib := config("env.lib")
-      if (inc != null)
-        process.env["INCLUDE"] = inc.split(';').map{it.toUri.toFile.osPath}.join(";")
-      if (lib != null)
-        process.env["LIB"] = lib.split(';').map{it.toUri.toFile.osPath}.join(";")
-      
-      log.info("Exec $cmds")
-      result := process.run.join
-      if (result != 0) throw fatal("Exec failed [$cmd]")
-    } catch (Err err) {
-      throw fatal(cmds.join(" "), err)
-    }
+    
+    process := Process(cmds, dir)
+    inc := config("env.include")
+    lib := config("env.lib")
+    if (inc != null)
+      process.env["INCLUDE"] = inc.split(';').map{it.toUri.toFile.osPath}.join(";")
+    if (lib != null)
+      process.env["LIB"] = lib.split(';').map{it.toUri.toFile.osPath}.join(";")
+    
+    log.info("Exec $cmds")
+    result := process.run.join
+    if (result != 0) throw fatal("Exec failed [$cmd]")
+
   }
 
 //////////////////////////////////////////////////////////////////////////
