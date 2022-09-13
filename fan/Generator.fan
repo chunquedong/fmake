@@ -40,7 +40,12 @@ class Generator {
 	}
 
 	private Str toPath(Uri uri, Bool keepPath = false) {
-		path := uri.toFile.osPath
+		rel := uri.relTo(buildInfo.scriptDir)
+		path := rel.toFile.osPath
+
+		if (rel != uri) {
+			path = "../../"+path
+		}
 
 		if (Env.cur.os == "win32" && !keepPath) {
 			path = path.replace("\\", "/")

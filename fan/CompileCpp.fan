@@ -107,6 +107,7 @@ class CompileCpp
 
       log.info("BUILD SUCCESS")
     } catch (Err e) {
+      log.info(e.msg)
       log.info("BUILD FAIL")
     }
   }
