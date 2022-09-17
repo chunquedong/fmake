@@ -324,6 +324,26 @@ class CompileCpp
 // install
 //////////////////////////////////////////////////////////////////////////
 
+  private Void copyHeaderFile(File? outDir) {
+    File? dstIncludeDir
+    if (buildInfo.includeDst != null) {
+      dstIncludeDir = (outDir + `include/${buildInfo.includeDst}/`).create
+    }
+    else {
+      dstIncludeDir = (outDir + `include/`).create
+    }
+
+    copyInto([buildInfo.includeDir], dstIncludeDir, true,
+    [
+      "overwrite":true,
+      "exclude":|File f->Bool|
+      {
+        if (f.isDir) return false
+        return f.ext != "h" && f.ext != "hpp" && f.ext != "inl"
+      }
+    ])
+  }
+
   **
   ** copy include head and res
   **
@@ -334,27 +354,11 @@ class CompileCpp
     }
 
     if (buildInfo.outType != TargetType.exe) {
-      //copy include files
-      File? dstIncludeDir
-      if (buildInfo.includeDst != null) {
-        dstIncludeDir = (outPodDir + `include/${buildInfo.includeDst}/`).create
-      }
-      else {
-        dstIncludeDir = (outPodDir + `include/`).create
-      }
+      copyHeaderFile(outPodDir)
+      copyHeaderFile(buildInfo.outDir.toFile)
 
-      echo(buildInfo.includeDir)
-      echo(dstIncludeDir)
-      
-      copyInto([buildInfo.includeDir], dstIncludeDir, true,
-        [
-          "overwrite":true,
-          "exclude":|File f->Bool|
-          {
-            if (f.isDir) return false
-            return f.ext != "h" && f.ext != "hpp" && f.ext != "inl"
-          }
-        ])
+      libDirs := (buildInfo.outDir + `lib-${buildInfo.debug}/`).toFile.create
+      (outPodDir+`lib/`).copyTo(libDirs, ["overwrite":true])
     }
 
     (outPodDir + `meta.props`).out.writeProps(meta)

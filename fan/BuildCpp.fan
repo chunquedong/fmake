@@ -303,6 +303,10 @@ class BuildCpp
       outDirFile.create
       outDir = outDirFile.uri
     }
+
+    //incDirs.add(outDir + `include/`)
+    //libDirs.add(outDir + `lib-${debug}/`)
+
     applayDepends
     validate
   }
