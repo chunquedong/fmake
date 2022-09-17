@@ -148,7 +148,15 @@ class Generator {
 	    if (buildInfo.outType != TargetType.exe) {
 		    out.printLine("add_custom_command(TARGET $buildInfo.name POST_BUILD ")
 	        out.printLine("  COMMAND \${CMAKE_COMMAND} -E copy_directory ")
-	        incOut := toPath(outPodDir+`include/`)
+
+	        Uri? dstIncludeDir
+	        if (buildInfo.includeDst != null) {
+	          dstIncludeDir = (outPodDir + `include/${buildInfo.includeDst}/`)
+	        }
+	        else {
+	          dstIncludeDir = (outPodDir + `include/`)
+	        }
+	        incOut := toPath(dstIncludeDir)
 	        incFrom := toPath(buildInfo.includeDir)
 	        out.printLine("  $incFrom $incOut ")
 	        out.printLine(")")
@@ -229,7 +237,14 @@ class Generator {
 
 	    //copy include
 	    if (buildInfo.outType != TargetType.exe) {
-	        incOut := toPath(outPodDir+`include/`, true)
+	    	Uri? dstIncludeDir
+	        if (buildInfo.includeDst != null) {
+	          dstIncludeDir = (outPodDir + `include/${buildInfo.includeDst}/`)
+	        }
+	        else {
+	          dstIncludeDir = (outPodDir + `include/`)
+	        }
+	        incOut := toPath(dstIncludeDir, true)
 	        incFrom := toPath(buildInfo.includeDir, true)
 	        out.printLine("QMAKE_POST_LINK += \$\$QMAKE_COPY_DIR $incFrom $incOut \$\$escape_expand(\\n\\t)")
 	    }

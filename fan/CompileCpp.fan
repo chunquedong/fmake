@@ -334,7 +334,17 @@ class CompileCpp
 
     if (buildInfo.outType != TargetType.exe) {
       //copy include files
-      dstIncludeDir := (outPodDir + `include/`).create
+      File? dstIncludeDir
+      if (buildInfo.includeDst != null) {
+        dstIncludeDir = (outPodDir + `include/${buildInfo.includeDst}/`).create
+      }
+      else {
+        dstIncludeDir = (outPodDir + `include/`).create
+      }
+
+      echo(buildInfo.includeDir)
+      echo(dstIncludeDir)
+      
       copyInto([buildInfo.includeDir], dstIncludeDir, true,
         [
           "overwrite":true,

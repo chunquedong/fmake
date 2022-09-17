@@ -90,6 +90,7 @@ require install cmake.
   extLibs: extra depend library name
   defines: user define macro
   extConfigs.cppflags: compiler flags
+  incDst
 ```
 
 #### platform-dependent configuration

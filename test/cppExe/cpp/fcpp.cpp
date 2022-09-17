@@ -1,6 +1,6 @@
 
 
-#include "hello.h"
+#include "helloLib/hello.h"
 
 int main() {
   cout << getStr() << endl; // prints Hello World!!!

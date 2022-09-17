@@ -63,6 +63,9 @@ class BuildCpp
   ** self public include to install
   Uri? includeDir
 
+  ** header file install destination directories
+  Str? includeDst
+
   ** List of resource
   Uri[] resDirs := [,]
 
@@ -184,6 +187,10 @@ class BuildCpp
     if (includeDir != null) {
       build.includeDir = scriptDir+includeDir.toUri
       build.incDirs.add(build.includeDir)
+    }
+    includeDst := props.get(os+"incDst")
+    if (includeDst != null) {
+      build.includeDst = includeDst
     }
     //get resDirs
     resDirs := parseDirs(props.get(os+"resDirs"))
