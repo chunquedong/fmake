@@ -152,6 +152,7 @@ class CompileCpp
     configs["outLibFile"] = fileToStr(outLibFile)
     configs["cflags"] = ""
     configs["cppflags"] = ""
+    configs["linkflags"] = ""
     configs.setAll(buildInfo.extConfigs)
 
     params := [Str:Str[]][:]
@@ -207,7 +208,7 @@ class CompileCpp
     }
   }
 
-    **
+  **
   ** Apply a set of macro substitutions to the given pattern.
   ** Substitution keys are indicated in the pattern using "@{key}"
   ** and replaced by definition in macros map.  If a substitution
@@ -351,7 +352,7 @@ class CompileCpp
           "exclude":|File f->Bool|
           {
             if (f.isDir) return false
-            return f.ext != "h" && f.ext != "hpp"
+            return f.ext != "h" && f.ext != "hpp" && f.ext != "inl"
           }
         ])
     }
