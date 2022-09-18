@@ -4,19 +4,27 @@ class Generator {
 	private BuildCpp buildInfo
 	private Log log := Log.get("fmake")
 	private File outDir
+	private Uri? fmakeRepo
+	private Bool isQmake
 
 	new make(BuildCpp buildInfo) {
 		this.buildInfo = buildInfo
 		outDir = (buildInfo.scriptDir + `build/`).toFile
 		outDir.create
+		fmakeRepoStr := Env.cur.vars["FMAKE_REPO"]
+		if (fmakeRepoStr != null) {
+			fmakeRepo = File.os(fmakeRepoStr).uri
+		}
 	}
 
 	Void run() {
+		isQmake = true
 		qout := (outDir + `${buildInfo.name}.pro`).out
 		genQmake(qout)
 		qout.close
 		echo(outDir + `${buildInfo.name}.pro`)
 
+		isQmake = false
 		out := (outDir + `${buildInfo.name}/CMakeLists.txt`).out
 		genCmake(out)
 		out.close
@@ -41,10 +49,27 @@ class Generator {
 
 	private Str toPath(Uri uri, Bool keepPath = false) {
 		rel := uri.relTo(buildInfo.scriptDir)
+
 		path := rel.toFile.osPath
 
 		if (rel != uri) {
-			path = "../../"+path
+			if (isQmake) {
+				path = "../"+path
+			}
+			else {
+				path = "../../"+path
+			}
+		}
+		else if (fmakeRepo != null) {
+			rel = uri.relTo(fmakeRepo)
+			if (rel != uri) {
+				if (isQmake) {
+					path = "\$\$(FMAKE_REPO)/"+rel.toFile.osPath
+				}
+				else {
+					path = "\$ENV{FMAKE_REPO}/"+rel.toFile.osPath
+				}
+			}
 		}
 
 		if (Env.cur.os == "win32" && !keepPath) {

@@ -78,6 +78,8 @@ class BuildCpp
   ** src directories
   Uri[] srcDirs := [,]
 
+  Bool installGlobal = true
+
   Log log := Log.get("fmake")
 
 //////////////////////////////////////////////////////////////////////////
@@ -199,8 +201,8 @@ class BuildCpp
     outType := props.get(os+"outType")
     if (outType != null) build.outType = TargetType.fromStr(outType)
 
-    //debug := props.get(os+"debug")
-    //if (debug == "true") build.debug = "debug"
+    installGlobal := props.get(os+"installGlobal")
+    if (installGlobal != null) build.installGlobal = installGlobal == "true"
 
     extLibs := props.get(os+"extLibs")
     if (extLibs != null) build.libs.addAll(extLibs.split(','))
@@ -221,7 +223,7 @@ class BuildCpp
 
   ** init devHomeDir
   private static File getDevHomeDir() {
-    devHome := Env.cur.vars["FANX_DEV_HOME"]
+    devHome := Env.cur.vars["FMAKE_REPO"]
     if (devHome != null) {
       //Windows driver name
       if (devHome.size > 1 && devHome[0].isAlpha && devHome[1] == ':') {
@@ -229,9 +231,7 @@ class BuildCpp
       }
     }
     if (devHome == null)
-      devHome = Pod.find("build", false)?.config("devHome")
-    if (devHome == null)
-      devHome = Main#.pod.config("devHome")
+      devHome = Main#.pod.config("fmakeRepo")
 
     if (devHome != null)
     {

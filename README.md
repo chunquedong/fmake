@@ -90,7 +90,8 @@ require install cmake.
   extLibs: extra depend library name
   defines: user define macro
   extConfigs.cppflags: compiler flags
-  incDst
+  incDst: header file directory name
+  extConfigs.linkflags: link flags
 ```
 
 #### platform-dependent configuration
@@ -108,7 +109,7 @@ linux.define = ...
 
 ### Package Repository
 
-The defalut output to 'fanx/lib/cpp/'
+The output path setting by env var: FMAKE_REPO
 ```
   fanxHome
    |_lib

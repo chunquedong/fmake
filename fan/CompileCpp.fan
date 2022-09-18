@@ -355,10 +355,13 @@ class CompileCpp
 
     if (buildInfo.outType != TargetType.exe) {
       copyHeaderFile(outPodDir)
-      copyHeaderFile(buildInfo.outDir.toFile)
 
-      libDirs := (buildInfo.outDir + `lib-${buildInfo.debug}/`).toFile.create
-      (outPodDir+`lib/`).copyTo(libDirs, ["overwrite":true])
+      if (buildInfo.installGlobal) {
+        copyHeaderFile(buildInfo.outDir.toFile)
+
+        libDirs := (buildInfo.outDir + `lib-${buildInfo.debug}/`).toFile.create
+        (outPodDir+`lib/`).copyTo(libDirs, ["overwrite":true])
+      }
     }
 
     (outPodDir + `meta.props`).out.writeProps(meta)
