@@ -129,6 +129,12 @@ class Generator {
 	    buildInfo.sources.each {
 			out.print("  ${toPath(it)}\n")
 		}
+
+		buildInfo.includeDir.toFile.walk |f| {
+			if (f.ext == "h" || f.ext == "hpp" || f.ext == "inl") {
+				out.print("  ${toPath(f.uri)}\n")
+			}
+		}
 		out.printLine(")")
 
 
@@ -221,6 +227,14 @@ class Generator {
 		out.printLine("SOURCES += \\")
 		buildInfo.sources.each {
 			out.print("  ${toPath(it)} \\\n")
+		}
+		out.printLine("")
+
+		out.printLine("HEADERS += \\")
+		buildInfo.includeDir.toFile.walk |f| {
+			if (f.ext == "h" || f.ext == "hpp" || f.ext == "inl") {
+				out.print("  ${toPath(f.uri)} \\\n")
+			}
 		}
 		out.printLine("")
 
