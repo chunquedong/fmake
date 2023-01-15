@@ -47,7 +47,7 @@ class Generator {
 	    }
 	}
 
-	private Str toPath(Uri uri, Bool keepPath = false) {
+	private Str toPath(Uri uri, Bool keepPath = false, Str? filter = null) {
 		rel := uri.relTo(buildInfo.scriptDir)
 
 		path := rel.toFile.osPath
@@ -72,8 +72,17 @@ class Generator {
 			}
 		}
 
-		if (Env.cur.os == "win32" && !keepPath) {
-			path = path.replace("\\", "/")
+		if (filter != null) {
+			path += "/" + filter
+		}
+
+		if (Env.cur.os == "win32") {
+			if (!keepPath) {
+				path = path.replace("\\", "/")
+			}
+			else {
+				path = path.replace("/", "\\")
+			}
 		}
 
 		if (path.contains(" ")) {
@@ -177,22 +186,32 @@ class Generator {
 
 	    //copy include
 	    if (buildInfo.outType != TargetType.exe) {
-		    out.printLine("add_custom_command(TARGET $buildInfo.name POST_BUILD ")
-	        out.printLine("  COMMAND \${CMAKE_COMMAND} -E copy_directory ")
+	    	copyHeaderFile |from, to| {
+        		incFrom := toPath(from)
+        		incOut := toPath(outPodDir+to)
 
-	        Uri? dstIncludeDir
-	        if (buildInfo.includeDst != null) {
-	          dstIncludeDir = (outPodDir + `include/${buildInfo.includeDst}/`)
+			    out.printLine("add_custom_command(TARGET $buildInfo.name POST_BUILD ")
+		        out.printLine("  COMMAND \${CMAKE_COMMAND} -E copy ")
+		        out.printLine("  $incFrom $incOut ")
+		        out.printLine(")")
 	        }
-	        else {
-	          dstIncludeDir = (outPodDir + `include/`)
-	        }
-	        incOut := toPath(dstIncludeDir)
-	        incFrom := toPath(buildInfo.includeDir)
-	        out.printLine("  $incFrom $incOut ")
-	        out.printLine(")")
 	    }
+	}
 
+	private Void copyHeaderFile(|Uri,Uri| cb) {
+		buildInfo.includeDir.toFile.walk |f| {
+        	if (f.ext == "h" || f.ext == "hpp" || f.ext == "inl") {
+        		rel := f.uri.relTo(buildInfo.includeDir)
+		        Uri? dstIncludeDir
+		        if (buildInfo.includeDst != null) {
+		          dstIncludeDir = (`include/${buildInfo.includeDst}/$rel`)
+		        }
+		        else {
+		          dstIncludeDir = (`include/$rel`)
+		        }
+		        cb.call(f.uri, dstIncludeDir)
+        	}
+        }
 	}
 
 	private Void genQmake(OutStream out) {
@@ -278,14 +297,20 @@ class Generator {
 	    if (buildInfo.outType != TargetType.exe) {
 	    	Uri? dstIncludeDir
 	        if (buildInfo.includeDst != null) {
-	          dstIncludeDir = (outPodDir + `include/${buildInfo.includeDst}/`)
+	          dstIncludeDir = (`include/${buildInfo.includeDst}/`)
 	        }
 	        else {
-	          dstIncludeDir = (outPodDir + `include/`)
+	          dstIncludeDir = (`include/`)
 	        }
-	        incOut := toPath(dstIncludeDir, true)
-	        incFrom := toPath(buildInfo.includeDir, true)
-	        out.printLine("QMAKE_POST_LINK += \$\$QMAKE_COPY_DIR $incFrom $incOut \$\$escape_expand(\\n\\t)")
+	        incOut := toPath(outPodDir+dstIncludeDir, true)
+	        incFrom := toPath(buildInfo.includeDir, true, "*.h")
+		    out.printLine("QMAKE_POST_LINK += \$\$QMAKE_COPY_DIR $incFrom $incOut \$\$escape_expand(\\n\\t)")
+
+		    incFrom = toPath(buildInfo.includeDir, true, "*.hpp")
+		    out.printLine("QMAKE_POST_LINK += \$\$QMAKE_COPY_DIR $incFrom $incOut \$\$escape_expand(\\n\\t)")
+
+		    incFrom = toPath(buildInfo.includeDir, true, "*.inl")
+		    out.printLine("QMAKE_POST_LINK += \$\$QMAKE_COPY_DIR $incFrom $incOut \$\$escape_expand(\\n\\t)")
 	    }
 	}
 }
