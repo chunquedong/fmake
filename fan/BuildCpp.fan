@@ -233,6 +233,10 @@ class BuildCpp
     if (devHome == null)
       devHome = Main#.pod.config("fmakeRepo")
 
+    if (devHome == null) {
+      devHome = Env.cur.userDir.toStr
+    }
+
     if (devHome != null)
     {
       path := devHome.toUri
