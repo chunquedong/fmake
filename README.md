@@ -92,6 +92,8 @@ require install cmake.
   extConfigs.cppflags: compiler flags
   incDst: header file directory name
   extConfigs.linkflags: link flags
+  debug.defines
+  debug.extLibs
 ```
 
 #### platform-dependent configuration

@@ -206,8 +206,13 @@ class BuildCpp
 
     extLibs := props.get(os+"extLibs")
     if (extLibs != null) build.libs.addAll(extLibs.split(','))
+    debugExtLibs := props.get(os+debug +".extLibs")
+    if (debugExtLibs != null) build.libs.addAll(debugExtLibs.split(','))
+
     defines := props.get(os+"defines")
     if (defines != null) build.defines.addAll(defines.split(','))
+    debugDefines := props.get(os+debug +".defines")
+    if (debugDefines != null) build.defines.addAll(debugDefines.split(','))
 
     build.incDirs.addAll(parseDirs(props.get(os+"extIncDirs"), [,]))
     build.libDirs.addAll(parseDirs(props.get(os+"extLibDirs"), [,]))
@@ -286,7 +291,7 @@ class BuildCpp
           }
         }
         if (count == 0)
-          throw fatal("don't find any lib in ${it.name}-${it.version}/lib/")
+          throw fatal("don't find any lib in $dep")
       }
   }
 
