@@ -144,7 +144,8 @@ class CompileCpp
       "pod.depends" : buildInfo.depends.map { it.toStr } ->join(";"),
       "pod.summary" : buildInfo.summary,
       "pod.buildTime" : DateTime.now.toStr,
-      "pod.compiler" : compiler
+      "pod.compiler" : compiler,
+      "pod.include" : buildInfo.includeDir.pathStr
     ]
 
     configs = this.typeof.pod.props(`config.props`, 1min).dup

@@ -258,11 +258,26 @@ class BuildCpp
       outHome := outDir.toFile
       depends.each
       {
-        dep := outHome + `${it.name}-${it.version}-${debug}/include/`
-        if (!dep.exists) throw fatal("don't find the depend $it")
-        incDirs.add(dep.uri)
+        includeFound := false
+        metaPath := outHome + `${it.name}-${it.version}-${debug}/meta.props`
+        if (metaPath.exists) {
+          meta := metaPath.in.readProps
+          include := meta.get("pod.include")
+          if (include != null) {
+            includePath := Uri(include).toFile
+            if (includePath.exists) {
+              incDirs.add(includePath.uri)
+              includeFound = true
+            }
+          }
+        }
+        if (!includeFound) {
+          dep := outHome + `${it.name}-${it.version}-${debug}/include/`
+          if (!dep.exists) throw fatal("don't find the depend $it")
+          incDirs.add(dep.uri)
+        }
 
-        dep = outHome + `${it.name}-${it.version}-${debug}/lib/`
+        dep := outHome + `${it.name}-${it.version}-${debug}/lib/`
         if (!dep.exists) throw fatal("don't find the depend $it")
         libDirs.add(dep.uri)
       }
