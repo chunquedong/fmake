@@ -101,7 +101,7 @@ class BuildCpp
         if (f.isDir){
           f.listFiles.each {
             ext := it.ext
-            if (ext == "cpp" || ext == "c" || ext == "cc" || ext == "cxx") {
+            if (ext == "cpp" || ext == "c" || ext == "cc" || ext == "cxx" || ext == "m") {
               if (excludeSrc != null) {
                 rel := it.uri.relTo(scriptDir)
                 if (!excludeSrc.matches(rel.toStr)) {

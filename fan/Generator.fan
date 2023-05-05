@@ -105,6 +105,10 @@ class Generator {
 			out.printLine("list(APPEND CMAKE_CXX_FLAGS $cppflags)")
 		}
 
+		if (buildInfo.debug == "debug") {
+			out.printLine("SET(CMAKE_BUILD_TYPE \"Debug\")")
+		}
+
 		out.printLine("add_definitions (")
 		buildInfo.defines.each {
 			out.print("  -D$it\n")
