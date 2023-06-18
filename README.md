@@ -131,7 +131,19 @@ The output path setting by env var: FMAKE_REPO
         |  |_lib
         |...
 
-````
+```
+
+### Emscripten
+
+fanx/etc/fmake/config.props:
+```
+compiler=gcc
+gcc.home=/D:/workspace/emsdk/upstream/emscripten/
+gcc.name@{cpp}=emcc.bat @{cppflags}
+gcc.name@{c}=emcc.bat @{cflags}
+gcc.ar=emar.bat
+gcc.link=emcc.bat
+```
 
 ### Do More Task
 

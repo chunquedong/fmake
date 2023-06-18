@@ -23,9 +23,11 @@ gcc.flags@{debug}=-DDEBUG
 gcc.flags@{release}= -O3
 gcc.name@{cpp}=g++ @{cppflags}
 gcc.name@{c}=gcc @{cflags}
+gcc.ar=ar
+gcc.link=g++
 
 gcc.comp=@{gcc.name} -c -g -fPIC -fpermissive -Wall @{gcc.flags} @{gcc.defines} @{gcc.incDirs} -o @{objFile} @{srcFile}
-gcc.lib=ar -vcqs @{outLibFile}.a @{gcc.objList}
-gcc.exe=g++ -g -o @{outFile} @{gcc.objList} @{gcc.libDirs} @{gcc.libNames}
-gcc.dll=g++ -g -shared -o @{outLibFile}.so @{gcc.objList} @{gcc.libDirs} @{gcc.libNames}
+gcc.lib=@{gcc.ar} -vcqs @{outLibFile}.a @{gcc.objList}
+gcc.exe=@{gcc.link} -g -o @{outFile} @{gcc.objList} @{gcc.libDirs} @{gcc.libNames}
+gcc.dll=@{gcc.link} -g -shared -o @{outLibFile}.so @{gcc.objList} @{gcc.libDirs} @{gcc.libNames}
 
