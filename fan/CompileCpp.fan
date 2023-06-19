@@ -148,6 +148,10 @@ class CompileCpp
       "pod.include" : buildInfo.includeDir.pathStr
     ]
 
+    if (buildInfo.includeDst != null) {
+      meta.remove("pod.include")
+    }
+
     configs = this.typeof.pod.props(`config.props`, 1min).dup
     configs["outFile"] = fileToStr(outFile)
     configs["outLibFile"] = fileToStr(outLibFile)

@@ -6,4 +6,3 @@ version = 1.0.0
 srcDirs = cpp/
 incDir = cpp/
 resDirs = res/
-incDst = helloLib
