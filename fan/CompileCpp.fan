@@ -175,6 +175,9 @@ class CompileCpp
     applayMacrosForList(params)
     selectMacros(buildInfo.debug)
     fileDirtyMap.clear
+
+    oldFile := outBinDir +("lib"+buildInfo.name+".a").toUri
+    oldFile.delete
   }
 
   private Str getPatternKey(Str s) {

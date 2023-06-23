@@ -288,7 +288,7 @@ class BuildCpp
         count := 0
         dep.listFiles.each
         {
-          if (it.ext == "lib" || it.ext == "a" || it.ext == "so")
+          if (it.ext == "a" || it.ext == "so")
           {
             if (it.name.startsWith("lib") && it.name.endsWith(".a"))
             {
@@ -300,9 +300,20 @@ class BuildCpp
               i := it.name.indexr(".so")
               libs.add(it.name[3..<i])
             }
-            else
+            else {
               libs.add(it.name)
+            }
             count++
+          }
+        }
+        if (count == 0) {
+          dep.listFiles.each
+          {
+            if (it.ext == "lib")
+            {
+              libs.add(it.name)
+              count++
+            }
           }
         }
         if (count == 0)
