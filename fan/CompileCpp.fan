@@ -255,8 +255,8 @@ class CompileCpp
     cmds := cmd.split.map { it.replace("::", " ") }
     
     process := Process(cmds, dir)
-    inc := config("env.include")
-    lib := config("env.lib")
+    inc := config("${compiler}.include_dir")
+    lib := config("${compiler}.lib_dir")
     if (inc != null)
       process.env["INCLUDE"] = inc.split(';').map{it.toUri.toFile.osPath}.join(";")
     if (lib != null)

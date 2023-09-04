@@ -22,26 +22,19 @@ Build from source:
 
 ### Setting on Windows
 1. Setting compiler (Options)
-
-The msvc and gcc is default compiler.
-
+If you don't want to run in 'Visual Studio Developer Command Prompt'.
 fanx/etc/fmake/config.props:
 ```
-  compiler=clang
-```
+compiler=msvc
+msvc.home=/D:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.28.29333/bin/Hostx64/x64/
+msvc.include_dir=/D:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.28.29333/include/;/C:/Program Files (x86)/Windows Kits/10/Include/10.0.18362.0/ucrt/;/C:/Program Files (x86)/Windows Kits/10/Include/10.0.18362.0/winrt/;/C:/Program Files (x86)/Windows Kits/10/Include/10.0.18362.0/cppwinrt/winrt/;/C:/Program Files (x86)/Windows Kits/10/Include/10.0.18362.0/shared/;/C:/Program Files (x86)/Windows Kits/10/Include/10.0.18362.0/um/
+msvc.lib_dir=/D:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.28.29333/lib/x64/;/C:/Program Files (x86)/Windows Kits/10/Lib/10.0.18362.0/ucrt/x64/;/C:/Program Files (x86)/Windows Kits/10/Lib/10.0.18362.0/um/x64/
 
-2. Config Env Vars (Options)
-
-If you don't want to run comand line in 'Visual Studio Developer Command Prompt'.
-```
-  INCLUDE=D:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/
-  LIB=D:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.28.29333/lib/x64/;C:/Program Files (x86)/Windows Kits/10/Lib/10.0.18362.0/ucrt/x64/;C:/Program Files (x86)/Windows Kits/10/
-  path=D:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.28.29333/bin/Hostx64/x64
 ```
 
 ### Usage
 
-#### compile
+#### Compile
 
 build script 'fmake.props':
 ```
@@ -67,13 +60,13 @@ clean and compile:
   fan fmake -f  fmake.props
 ```
 
-#### generate project
+#### Generate project files
 require install cmake.
 ```
   fan fmake -G  fmake.props
 ```
 
-#### build script detail
+#### Build script detail
 
 ```
   name: name of lib
@@ -96,7 +89,7 @@ require install cmake.
   debug.extLibs
 ```
 
-#### platform-dependent configuration
+#### Platform-dependent configuration
 Prefix OS name
 - win32
 - macosx
@@ -111,9 +104,12 @@ linux.define = ...
 
 ### Package Repository
 
-The output path setting by env var: FMAKE_REPO
+The output path setting in fanx/etc/fmake/config.props:
+``
+fmakeRepo=/D:/fmakeRepo/
+``
+
 ```
-  fanxHome
    |_lib
       |_java
       |_donet
@@ -138,11 +134,12 @@ The output path setting by env var: FMAKE_REPO
 fanx/etc/fmake/config.props:
 ```
 compiler=gcc
-gcc.home=/D:/workspace/emsdk/upstream/emscripten/
-gcc.name@{cpp}=emcc.bat @{cppflags}
-gcc.name@{c}=emcc.bat @{cflags}
+gcc.home=/D:/workspace/source/emsdk/upstream/emscripten/
+gcc.name@{cpp}=emcc.bat @{cppflags} -pthread
+gcc.name@{c}=emcc.bat @{cflags} -pthread
 gcc.ar=emar.bat
-gcc.link=emcc.bat
+gcc.link=emcc.bat -pthread
+gcc.exe=@{gcc.link} @{linkflags} -o @{outFile}.js @{gcc.objList} @{gcc.libDirs} @{gcc.libNames}
 ```
 
 ### Do More Task
