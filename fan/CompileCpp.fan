@@ -47,6 +47,7 @@ class CompileCpp
     compiler = config("compiler", Env.cur.os == "win32" ? "msvc" : "gcc" )
     compHome = config(compiler+".home", "")
     outPodDir = (buildInfo.outDir + ("$buildInfo.name-$buildInfo.version-$buildInfo.debug/").toUri).toFile
+    objDir = File(buildInfo.scriptDir+`../build/$buildInfo.name-$buildInfo.debug-obj/`).create
   }
 
 //////////////////////////////////////////////////////////////////////////
@@ -99,9 +100,9 @@ class CompileCpp
       }
 
       if (buildInfo.outType == TargetType.lib)
-        exeCmd("lib", objDir)
+        exeCmd("lib")
       else
-        exeCmd(buildInfo.outType == TargetType.dll ? "dll" : "exe", objDir)
+        exeCmd(buildInfo.outType == TargetType.dll ? "dll" : "exe")
 
       install
 
@@ -124,6 +125,7 @@ class CompileCpp
 
   Void clean() {
     outPodDir.delete
+    objDir.delete
   }
 
   ** init. since dump test
@@ -135,7 +137,6 @@ class CompileCpp
     outBinDir = (outPodDir + dir).create
     outFile = (outBinDir + buildInfo.name.toUri)
     outLibFile := (outBinDir +("lib"+buildInfo.name).toUri)
-    objDir = (outPodDir + `obj/`).create
 
     meta =
     [
@@ -168,8 +169,9 @@ class CompileCpp
 
     scriptPath := buildInfo.scriptDir.pathStr
     params["objList"] = buildInfo.sources.map |f| {
-      path := f.pathStr.replace(scriptPath, "")
-      return fileToStr((path+".o").toUri.toFile)
+      objName := f.pathStr.replace(scriptPath, "")
+      objFile := objDir+(objName+".o").toUri
+      return fileToStr(objFile)
     }
 
     applayMacrosForList(params)
@@ -246,7 +248,7 @@ class CompileCpp
     return s
   }
 
-  private Void exeCmd(Str name, File? dir := null)
+  private Void exeCmd(Str name)
   {
     cmd := configs[compiler+"."+name]
     cmd = applyMacros(cmd, configs)
@@ -254,7 +256,7 @@ class CompileCpp
 
     cmds := cmd.split.map { it.replace("::", " ") }
     
-    process := Process(cmds, dir)
+    process := Process(cmds)
     inc := config("${compiler}.include_dir")
     lib := config("${compiler}.lib_dir")
     if (inc != null)

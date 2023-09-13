@@ -9,7 +9,7 @@ class Generator {
 
 	new make(BuildCpp buildInfo) {
 		this.buildInfo = buildInfo
-		outDir = (buildInfo.scriptDir + `build/`).toFile
+		outDir = (buildInfo.scriptDir + `../build/`).toFile
 		outDir.create
 		fmakeRepoStr := Env.cur.vars["FMAKE_REPO"]
 		if (fmakeRepoStr != null) {
@@ -37,7 +37,7 @@ class Generator {
 			cmds.add("-A").add("x64")
 		}
 		try {
-		  dir := buildInfo.scriptDir + `build/${buildInfo.name}/`
+		  dir := buildInfo.scriptDir + `../build/${buildInfo.name}/`
 	      process := Process(cmds, dir.toFile)
 	      log.info("Exec $cmds")
 	      result := process.run.join
@@ -52,12 +52,13 @@ class Generator {
 
 		path := rel.toFile.osPath
 
-		if (rel != uri) {
+		if (rel.pathStr != uri.pathStr) {
+            parentName := buildInfo.scriptDir.name
 			if (isQmake) {
-				path = "../"+path
+				path = "../$parentName/"+path
 			}
 			else {
-				path = "../../"+path
+				path = "../../$parentName/"+path
 			}
 		}
 		else if (fmakeRepo != null) {
