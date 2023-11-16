@@ -168,11 +168,15 @@ class CompileCpp
     params["libDirs"] = buildInfo.libDirs.map { fileToStr(it.toFile) }
 
     scriptPath := buildInfo.scriptDir.pathStr
+    curDir := File.os(".").normalize.uri
     params["objList"] = buildInfo.sources.map |f| {
       objName := f.pathStr.replace(scriptPath, "")
       objFile := objDir+(objName+".o").toUri
+      //echo("###$curDir,$objFile")
+      objFile = (objFile.uri.relTo(curDir)).toFile
       return fileToStr(objFile)
     }
+
 
     applayMacrosForList(params)
     selectMacros(buildInfo.debug)
