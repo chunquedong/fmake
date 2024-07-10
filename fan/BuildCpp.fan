@@ -334,9 +334,12 @@ class BuildCpp
     osParse(Env.cur.os+".", props)
 
     if (compiler == null) {
-      compiler = Env.cur.config(this.typeof.pod, "compiler", null)
+      compiler = props.get("compiler")
       if (compiler == null) {
-        compiler = Env.cur.os == "win32" ? "msvc" : "gcc"
+        compiler = Env.cur.config(this.typeof.pod, "compiler", null)
+        if (compiler == null) {
+          compiler = Env.cur.os == "win32" ? "msvc" : "gcc"
+        }
       }
     }
     osParse(compiler+".", props)
