@@ -21,6 +21,9 @@ class Main : AbstractMain
   @Opt { help = "debug build"; aliases=["d"] }
   Bool debug := false
 
+  @Opt { help = "compiler name"; aliases=["c"] }
+  Str? compiler := null
+
   @Arg { help = "build script" }
   File? scriptFile
 
@@ -32,6 +35,9 @@ class Main : AbstractMain
     build := BuildCpp()
     if (debug) {
       build.debug = "debug"
+    }
+    if (compiler != null) {
+      build.compiler = compiler
     }
     build.parse(scriptFile.normalize.uri)
 

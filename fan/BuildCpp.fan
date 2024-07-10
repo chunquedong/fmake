@@ -82,6 +82,9 @@ class BuildCpp
 
   Log log := Log.get("fmake")
 
+  ** compiler name
+  Str? compiler
+
 //////////////////////////////////////////////////////////////////////////
 // parse
 //////////////////////////////////////////////////////////////////////////
@@ -101,7 +104,7 @@ class BuildCpp
         if (f.isDir){
           f.listFiles.each {
             ext := it.ext
-            if (ext == "cpp" || ext == "c" || ext == "cc" || ext == "cxx" || ext == "m") {
+            if (ext == "cpp" || ext == "c" || ext == "cc" || ext == "cxx" || ext == "m" || ext == "C" || ext == "c++") {
               if (excludeSrc != null) {
                 rel := it.uri.relTo(scriptDir)
                 if (!excludeSrc.matches(rel.toStr)) {
@@ -329,6 +332,14 @@ class BuildCpp
       osParse("non-win", props)
     }
     osParse(Env.cur.os+".", props)
+
+    if (compiler == null) {
+      compiler = Env.cur.config(this.typeof.pod, "compiler", null)
+      if (compiler == null) {
+        compiler = Env.cur.os == "win32" ? "msvc" : "gcc"
+      }
+    }
+    osParse(compiler+".", props)
 
     excludeRegex := excludeSrc == null ? null : Regex.fromStr(excludeSrc)
     this.sources.addAll(srcList(this.srcDirs, excludeRegex))

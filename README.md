@@ -25,7 +25,6 @@ Build from source:
 If you don't want to run in 'Visual Studio Developer Command Prompt'.
 fanx/etc/fmake/config.props:
 ```
-compiler=msvc
 msvc.home=/D:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.28.29333/bin/Hostx64/x64/
 msvc.include_dir=/D:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.28.29333/include/;/C:/Program Files (x86)/Windows Kits/10/Include/10.0.18362.0/ucrt/;/C:/Program Files (x86)/Windows Kits/10/Include/10.0.18362.0/winrt/;/C:/Program Files (x86)/Windows Kits/10/Include/10.0.18362.0/cppwinrt/winrt/;/C:/Program Files (x86)/Windows Kits/10/Include/10.0.18362.0/shared/;/C:/Program Files (x86)/Windows Kits/10/Include/10.0.18362.0/um/
 msvc.lib_dir=/D:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.28.29333/lib/x64/;/C:/Program Files (x86)/Windows Kits/10/Lib/10.0.18362.0/ucrt/x64/;/C:/Program Files (x86)/Windows Kits/10/Lib/10.0.18362.0/um/x64/
@@ -49,7 +48,6 @@ build script 'fmake.props':
 compile:
 ```
   fan fmake fmake.props
-  
 ```
 debug compile:
 ```
@@ -58,6 +56,10 @@ debug compile:
 clean and compile:
 ```
   fan fmake -f  fmake.props
+```
+special compiler:
+```
+  fan fmake fmake.props -c gcc
 ```
 
 #### Generate project files
@@ -89,7 +91,7 @@ require install cmake.
   debug.extLibs
 ```
 
-#### Platform-dependent configuration
+#### Compiler and Platform-dependent configuration
 Prefix OS name
 - win32
 - macosx
@@ -99,6 +101,12 @@ Prefix OS name
 ```
 win32.extIncDirs = ...
 linux.define = ...
+```
+
+Compiler name
+```
+gcc.define = ...
+msvc.define = ...
 ```
 
 
@@ -133,7 +141,6 @@ fmakeRepo=/D:/fmakeRepo/
 
 fanx/etc/fmake/config.props:
 ```
-compiler=gcc
 gcc.home=/D:/workspace/source/emsdk/upstream/emscripten/
 gcc.name@{cpp}=emcc.bat @{cppflags} -pthread
 gcc.name@{c}=emcc.bat @{cflags} -pthread
