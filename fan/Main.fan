@@ -39,7 +39,7 @@ class Main : AbstractMain
     if (compiler != null) {
       build.compiler = compiler
     }
-    build.parse(scriptFile.normalize.uri)
+    build.parse(scriptFile.normalize.uri, !generate && !dump)
 
     if (generate) {
       Generator(build).run

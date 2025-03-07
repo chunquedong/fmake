@@ -257,7 +257,7 @@ class BuildCpp
     }
   }
 
-  Void applayDepends() {
+  Void applayDepends(Bool checkError) {
       outHome := outDir.toFile
       depends.each
       {
@@ -276,12 +276,26 @@ class BuildCpp
         }
         if (!includeFound) {
           dep := outHome + `${it.name}-${it.version}-${debug}/include/`
-          if (!dep.exists) throw fatal("don't find the depend $it")
+          if (!dep.exists) {
+            if (checkError) {
+              throw fatal("don't find the depend $it")
+            }
+            else {
+              fatal("don't find the depend $it")
+            }
+          }
           incDirs.add(dep.uri)
         }
 
         dep := outHome + `${it.name}-${it.version}-${debug}/lib/`
-        if (!dep.exists) throw fatal("don't find the depend $it")
+        if (!dep.exists) {
+          if (checkError) {
+            throw fatal("don't find the depend $it")
+          }
+          else {
+            fatal("don't find the depend $it")
+          }
+        }
         libDirs.add(dep.uri)
       }
 
@@ -319,12 +333,18 @@ class BuildCpp
             }
           }
         }
-        if (count == 0)
-          throw fatal("don't find any lib in $dep")
+        if (count == 0) {
+          if (checkError) {
+            throw fatal("don't find any lib in $dep")
+          }
+          else {
+            fatal("don't find any lib in $dep")
+          }
+        }
       }
   }
 
-  Void parse(Uri scriptFile) {
+  Void parse(Uri scriptFile, Bool checkError) {
     scriptDir = scriptFile.parent
     props := scriptFile.toFile.in.readProps
     osParse("", props)
@@ -356,7 +376,7 @@ class BuildCpp
     //incDirs.add(outDir + `include/`)
     //libDirs.add(outDir + `lib-${debug}/`)
 
-    applayDepends
+    applayDepends(checkError)
     validate
   }
 
