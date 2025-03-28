@@ -81,6 +81,7 @@ class CompileCpp
         //echo("touch $srcFile")
         configs["srcFile"] = fileToStr(srcFile.toFile)
         objName := srcFile.pathStr.replace(buildInfo.scriptDir.pathStr, "")
+        objName = objName.replace("..", "_");
         objFile := objDir+(objName+".o").toUri
         if (objFile.exists && !objFile.isDir) {
           if (!isDirty(srcFile.toFile, objFile.modified - 1sec)) {
@@ -171,6 +172,7 @@ class CompileCpp
     curDir := File.os(".").normalize.uri
     params["objList"] = buildInfo.sources.map |f| {
       objName := f.pathStr.replace(scriptPath, "")
+      objName = objName.replace("..", "_");
       objFile := objDir+(objName+".o").toUri
       //echo("###$curDir,$objFile")
       objFile = (objFile.uri.relTo(curDir)).toFile
