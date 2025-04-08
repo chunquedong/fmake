@@ -20,16 +20,11 @@ Build from source:
   fanb pod.props
 ```
 
-### Setting on Windows
-1. Setting compiler (Options)
-If you don't want to run in 'Visual Studio Developer Command Prompt'.
-fanx/etc/fmake/config.props:
+### Use the Microsoft C++ toolset from the shell:
 ```
-msvc.home=/D:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.28.29333/bin/Hostx64/x64/
-msvc.include_dir=/D:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.28.29333/include/;/C:/Program Files (x86)/Windows Kits/10/Include/10.0.18362.0/ucrt/;/C:/Program Files (x86)/Windows Kits/10/Include/10.0.18362.0/winrt/;/C:/Program Files (x86)/Windows Kits/10/Include/10.0.18362.0/cppwinrt/winrt/;/C:/Program Files (x86)/Windows Kits/10/Include/10.0.18362.0/shared/;/C:/Program Files (x86)/Windows Kits/10/Include/10.0.18362.0/um/
-msvc.lib_dir=/D:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.28.29333/lib/x64/;/C:/Program Files (x86)/Windows Kits/10/Lib/10.0.18362.0/ucrt/x64/;/C:/Program Files (x86)/Windows Kits/10/Lib/10.0.18362.0/um/x64/
-
+./vsvars.sh
 ```
+You might need to eidt the path in the vsvars.sh file.
 
 ### Usage
 
@@ -51,11 +46,11 @@ compile:
 ```
 debug compile:
 ```
-  fan fmake -d  fmake.props
+  fan fmake -d fmake.props
 ```
 clean and compile:
 ```
-  fan fmake -f  fmake.props
+  fan fmake -f fmake.props
 ```
 special compiler:
 ```
@@ -65,7 +60,7 @@ special compiler:
 #### Generate project files
 require install cmake.
 ```
-  fan fmake -G  fmake.props
+  fan fmake -G fmake.props
 ```
 
 #### Build script detail
@@ -142,10 +137,10 @@ fmakeRepo=/D:/fmakeRepo/
 fanx/etc/fmake/config.props:
 ```
 gcc.home=/D:/workspace/source/emsdk/upstream/emscripten/
-gcc.name@{cpp}=emcc.bat @{cppflags} -pthread
-gcc.name@{c}=emcc.bat @{cflags} -pthread
+gcc.name@{cpp}=emcc.bat @{cppflags}
+gcc.name@{c}=emcc.bat @{cflags}
 gcc.ar=emar.bat
-gcc.link=emcc.bat -pthread
+gcc.link=emcc.bat
 gcc.exe=@{gcc.link} @{linkflags} -o @{outFile}.js @{gcc.objList} @{gcc.libDirs} @{gcc.libNames}
 ```
 

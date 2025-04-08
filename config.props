@@ -5,7 +5,7 @@ msvc.libNames=[@{libNames}]
 msvc.objList=[@{objList}]
 
 msvc.flags@{debug}= /D_DEBUG /MDd @{cppflags} /Zi /Fd@{outFile}.pdb
-msvc.flags@{release}= /O2 /MD @{cppflags}
+msvc.flags@{release}= /DNDEBUG /O2 /MD @{cppflags}
 
 msvc.comp=cl /c /EHsc /nologo /DWIN32 /D_WINDOWS @{msvc.flags} @{msvc.defines} @{msvc.incDirs} /Fo@{objFile} @{srcFile}
 msvc.lib=lib /OUT:@{outFile}.lib @{msvc.objList}
@@ -20,7 +20,7 @@ gcc.libNames=[-l@{libNames}]
 gcc.objList=[@{objList}]
 
 gcc.flags@{debug}=-D_DEBUG -g
-gcc.flags@{release}= -O3
+gcc.flags@{release}=-DNDEBUG -O3
 gcc.name@{cpp}=g++ @{cppflags}
 gcc.name@{c}=gcc @{cflags}
 gcc.ar=ar
