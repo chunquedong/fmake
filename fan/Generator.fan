@@ -144,9 +144,11 @@ class Generator {
 			out.print("  ${toPath(it)}\n")
 		}
 
-		buildInfo.includeDir.toFile.walk |f| {
-			if (f.ext == "h" || f.ext == "hpp" || f.ext == "inl") {
-				out.print("  ${toPath(f.uri)}\n")
+		buildInfo.includeDirs.each |incdir| {
+			incdir.toFile.walk |f| {
+				if (f.ext == "h" || f.ext == "hpp" || f.ext == "inl") {
+					out.print("  ${toPath(f.uri)}\n")
+				}
 			}
 		}
 		out.printLine(")")
@@ -204,19 +206,21 @@ class Generator {
 	}
 
 	private Void copyHeaderFile(|Uri,Uri| cb) {
-		buildInfo.includeDir.toFile.walk |f| {
-        	if (f.ext == "h" || f.ext == "hpp" || f.ext == "inl") {
-        		rel := f.uri.relTo(buildInfo.includeDir)
-		        Uri? dstIncludeDir
-		        if (buildInfo.includeDst != null) {
-		          dstIncludeDir = (`include/${buildInfo.includeDst}/$rel`)
-		        }
-		        else {
-		          dstIncludeDir = (`include/$rel`)
-		        }
-		        cb.call(f.uri, dstIncludeDir)
-        	}
-        }
+		buildInfo.includeDirs.each |incdir| {
+			incdir.toFile.walk |f| {
+				if (f.ext == "h" || f.ext == "hpp" || f.ext == "inl") {
+					rel := f.uri.relTo(incdir)
+					Uri? dstIncludeDir
+					if (buildInfo.includeDst != null) {
+						dstIncludeDir = (`include/${buildInfo.includeDst}/$rel`)
+					}
+					else {
+						dstIncludeDir = (`include/$rel`)
+					}
+					cb.call(f.uri, dstIncludeDir)
+				}
+			}
+		}
 	}
 
 	private Void genQmake(OutStream out) {
@@ -255,9 +259,11 @@ class Generator {
 		out.printLine("")
 
 		out.printLine("HEADERS += \\")
-		buildInfo.includeDir.toFile.walk |f| {
-			if (f.ext == "h" || f.ext == "hpp" || f.ext == "inl") {
-				out.print("  ${toPath(f.uri)} \\\n")
+		buildInfo.includeDirs.each |incdir| {
+			incdir.toFile.walk |f| {
+				if (f.ext == "h" || f.ext == "hpp" || f.ext == "inl") {
+					out.print("  ${toPath(f.uri)} \\\n")
+				}
 			}
 		}
 		out.printLine("")
@@ -307,15 +313,18 @@ class Generator {
 	        else {
 	          dstIncludeDir = (`include/`)
 	        }
-	        incOut := toPath(outPodDir+dstIncludeDir, true)
-	        incFrom := toPath(buildInfo.includeDir, true, "*.h")
-		    out.printLine("QMAKE_POST_LINK += \$\$QMAKE_COPY_DIR $incFrom $incOut \$\$escape_expand(\\n\\t)")
 
-		    incFrom = toPath(buildInfo.includeDir, true, "*.hpp")
-		    out.printLine("QMAKE_POST_LINK += \$\$QMAKE_COPY_DIR $incFrom $incOut \$\$escape_expand(\\n\\t)")
+			buildInfo.includeDirs.each |incdir| {
+				incOut := toPath(outPodDir+dstIncludeDir, true)
+				incFrom := toPath(incdir, true, "*.h")
+				out.printLine("QMAKE_POST_LINK += \$\$QMAKE_COPY_DIR $incFrom $incOut \$\$escape_expand(\\n\\t)")
 
-		    incFrom = toPath(buildInfo.includeDir, true, "*.inl")
-		    out.printLine("QMAKE_POST_LINK += \$\$QMAKE_COPY_DIR $incFrom $incOut \$\$escape_expand(\\n\\t)")
+				incFrom = toPath(incdir, true, "*.hpp")
+				out.printLine("QMAKE_POST_LINK += \$\$QMAKE_COPY_DIR $incFrom $incOut \$\$escape_expand(\\n\\t)")
+
+				incFrom = toPath(incdir, true, "*.inl")
+				out.printLine("QMAKE_POST_LINK += \$\$QMAKE_COPY_DIR $incFrom $incOut \$\$escape_expand(\\n\\t)")
+			}
 	    }
 	}
 }

@@ -72,7 +72,7 @@ require install cmake.
   outType: exe, lib, dll
   srcDirs: input directory or file (Must ends with '/' for dir)
   excludeSrc: exclude regex in srcDirs scan
-  incDir: include directory to copy
+  incDirs: include directory to copy
   resDirs: resource files to copy
   depends: library with version
   extIncDirs: extra include dirs

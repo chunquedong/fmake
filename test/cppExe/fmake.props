@@ -4,7 +4,7 @@ name = helloExe
 summary = test exe
 outType = exe
 srcDirs = cpp/
-incDir = cpp/
+incDirs = cpp/
 depends = helloLib 1.0.0
 defines = DEBUG=1
 extConfigs.cppflags = -std=c++11

@@ -110,6 +110,7 @@ class CompileCpp
       log.info("BUILD SUCCESS")
     } catch (Err e) {
       log.info(e.msg)
+      e.trace
       log.info("BUILD FAIL")
     }
   }
@@ -139,6 +140,7 @@ class CompileCpp
     outFile = (outBinDir + buildInfo.name.toUri)
     outLibFile := (outBinDir +("lib"+buildInfo.name).toUri)
 
+    includeDir := buildInfo.includeDirs.first
     meta =
     [
       "pod.name" : buildInfo.name,
@@ -146,10 +148,11 @@ class CompileCpp
       "pod.depends" : buildInfo.depends.map { it.toStr } ->join(";"),
       "pod.summary" : buildInfo.summary,
       "pod.buildTime" : DateTime.now.toStr,
-      "pod.compiler" : compiler,
-      "pod.include" : buildInfo.includeDir.pathStr
+      "pod.compiler" : compiler
     ]
-
+    if (includeDir != null && includeDir.isDir) {
+      meta["pod.include"] = includeDir.pathStr
+    }
     if (buildInfo.includeDst != null) {
       meta.remove("pod.include")
     }
@@ -349,7 +352,7 @@ class CompileCpp
       dstIncludeDir = (outDir + `include/`).create
     }
 
-    copyInto([buildInfo.includeDir], dstIncludeDir, true,
+    copyInto(buildInfo.includeDirs, dstIncludeDir, true,
     [
       "overwrite":true,
       "exclude":|File f->Bool|

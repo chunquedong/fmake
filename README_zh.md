@@ -72,7 +72,7 @@ debug模式编译:
   outType: exe, lib, dll
   srcDirs: 输入的源文件路径（文件夹需要以'/'结尾）
   excludeSrc: 在搜索源文件时需要排除的文件
-  incDir: 需要拷贝的头文件目录
+  incDirs: 需要拷贝的头文件目录
   resDirs: 需要拷贝的资源文件目录
   depends: 依赖的库（只需要名称和版本号，不需要指定头文件和库文件）
   extIncDirs: 额外的头文件搜索路径

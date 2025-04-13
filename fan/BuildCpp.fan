@@ -61,7 +61,7 @@ class BuildCpp
   Uri? scriptDir
 
   ** self public include to install
-  Uri? includeDir
+  Uri[] includeDirs = [,]
 
   ** header file install destination directories
   Str? includeDst
@@ -149,6 +149,9 @@ class BuildCpp
       }
       else {
         uri := scriptDir + d.toUri
+        if (d == "./") {
+          uri = scriptDir
+        }
         if (!uri.toFile.exists) throw fatal("Invalid file: $uri")
         srcDirs.add(uri)
       }
@@ -190,9 +193,16 @@ class BuildCpp
 
     includeDir := props.get(os+"incDir")
     if (includeDir != null) {
-      build.includeDir = scriptDir+includeDir.toUri
-      build.incDirs.add(build.includeDir)
+      build.includeDirs.add(scriptDir+includeDir.toUri)
+      build.incDirs.add(includeDir.toUri)
     }
+    
+    incDirs := parseDirs(props.get(os+"incDirs"))
+    if (incDirs != null) {
+      build.includeDirs.addAll(incDirs)
+      build.incDirs.addAll(incDirs)
+    }
+
     includeDst := props.get(os+"incDst")
     if (includeDst != null) {
       build.includeDst = includeDst
