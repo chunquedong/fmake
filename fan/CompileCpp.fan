@@ -62,6 +62,28 @@ class CompileCpp
     return Err(msg, err)
   }
 
+  private File getObjFile(Uri srcFile) {
+    pathStr := srcFile.pathStr
+    objName := pathStr.replace(buildInfo.scriptDir.pathStr, "")
+    if (objName != pathStr) {
+      objName = objName.replace("..", "_");
+    }
+    else {
+      ps := srcFile.path;
+      if (ps.size == 1) {
+        objName = ps[0]
+      }
+      else if (ps.size > 1) {
+        objName = ps[-2]+"/"+ps[-1]
+      }
+      else {
+        objName = pathStr
+      }
+    }
+    objFile := objDir+(objName+".o").toUri
+    return objFile;
+  }
+
   **
   ** Run the cc task
   **
@@ -80,9 +102,7 @@ class CompileCpp
       buildInfo.sources.each |srcFile| {
         //echo("touch $srcFile")
         configs["srcFile"] = fileToStr(srcFile.toFile)
-        objName := srcFile.pathStr.replace(buildInfo.scriptDir.pathStr, "")
-        objName = objName.replace("..", "_");
-        objFile := objDir+(objName+".o").toUri
+        objFile := getObjFile(srcFile)
         if (objFile.exists && !objFile.isDir) {
           if (!isDirty(srcFile.toFile, objFile.modified - 1sec)) {
             //echo("pass $srcFile $objFile")
@@ -174,9 +194,7 @@ class CompileCpp
     scriptPath := buildInfo.scriptDir.pathStr
     curDir := File.os(".").normalize.uri
     params["objList"] = buildInfo.sources.map |f| {
-      objName := f.pathStr.replace(scriptPath, "")
-      objName = objName.replace("..", "_");
-      objFile := objDir+(objName+".o").toUri
+      objFile := getObjFile(f)
       //echo("###$curDir,$objFile")
       objFile = (objFile.uri.relTo(curDir)).toFile
       return fileToStr(objFile)
