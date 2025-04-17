@@ -61,7 +61,7 @@ class BuildCpp
   Uri? scriptDir
 
   ** self public include to install
-  Uri[] includeDirs = [,]
+  Uri[] installHeaders = [,]
 
   ** header file install destination directories
   Str? includeDst
@@ -78,7 +78,7 @@ class BuildCpp
   ** src directories
   Uri[] srcDirs := [,]
 
-  Bool installGlobal = true
+  Bool installGlobal = false
 
   Log log := Log.get("fmake")
 
@@ -193,14 +193,17 @@ class BuildCpp
 
     includeDir := props.get(os+"incDir")
     if (includeDir != null) {
-      build.includeDirs.add(scriptDir+includeDir.toUri)
-      build.incDirs.add(includeDir.toUri)
+      incDir := scriptDir+includeDir.toUri
+      build.installHeaders.add(incDir)
+      if (incDir.isDir) { build.incDirs.add(incDir) }
     }
     
     incDirs := parseDirs(props.get(os+"incDirs"))
     if (incDirs != null) {
-      build.includeDirs.addAll(incDirs)
-      build.incDirs.addAll(incDirs)
+      build.installHeaders.addAll(incDirs)
+      incDirs.each |incdir| {
+        if (incdir.isDir) build.incDirs.add(incdir)
+      }
     }
 
     includeDst := props.get(os+"incDst")
@@ -213,9 +216,6 @@ class BuildCpp
 
     outType := props.get(os+"outType")
     if (outType != null) build.outType = TargetType.fromStr(outType)
-
-    installGlobal := props.get(os+"installGlobal")
-    if (installGlobal != null) build.installGlobal = installGlobal == "true"
 
     extLibs := props.get(os+"extLibs")
     if (extLibs != null) build.libs.addAll(extLibs.split(','))
@@ -240,7 +240,7 @@ class BuildCpp
   }
 
   ** init devHomeDir
-  private static File getDevHomeDir() {
+  private static File getFmakeRepoDir() {
     devHome := Env.cur.vars["FMAKE_REPO"]
     if (devHome != null) {
       //Windows driver name
@@ -252,18 +252,21 @@ class BuildCpp
       devHome = Main#.pod.config("fmakeRepo")
 
     if (devHome == null) {
-      devHome = Env.cur.userDir.toStr
+      devHome = Env.cur.userDir.toStr + "/fmakeRepo/"
     }
 
     if (devHome != null)
     {
       path := devHome.toUri
       f := File(path)
-      if (!f.exists || !f.isDir) throw Err("Invalid dir URI for '$devHome'")
+      if (!f.exists) {
+        f.create
+      }
+      else if (!f.isDir) throw Err("Invalid dir URI for '$devHome'")
       return f
     }
     else {
-      return Env.cur.workDir
+      return Env.cur.workDir + `fmakeRepo/`
     }
   }
 
@@ -374,17 +377,16 @@ class BuildCpp
     }
     osParse(compiler+".", props)
 
+    installGlobal = Env.cur.config(this.typeof.pod, "installGlobal", "false") == "true"
+
     excludeRegex := excludeSrc == null ? null : Regex.fromStr(excludeSrc)
     this.sources.addAll(srcList(this.srcDirs, excludeRegex))
 
     if (outDir == null) {
-      outDirFile := (getDevHomeDir + `lib/cpp/`)
+      outDirFile := (getFmakeRepoDir + `$compiler/`)
       outDirFile.create
       outDir = outDirFile.uri
     }
-
-    //incDirs.add(outDir + `include/`)
-    //libDirs.add(outDir + `lib-${debug}/`)
 
     applayDepends(checkError)
     validate

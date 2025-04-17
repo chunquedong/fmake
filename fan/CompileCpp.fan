@@ -47,7 +47,7 @@ class CompileCpp
     compiler = buildInfo.compiler
     compHome = config(compiler+".home", "")
     outPodDir = (buildInfo.outDir + ("$buildInfo.name-$buildInfo.version-$buildInfo.debug/").toUri).toFile
-    objDir = File(buildInfo.scriptDir+`../build/$buildInfo.name-$buildInfo.debug-obj/`).create
+    objDir = File(buildInfo.scriptDir+`../build/$buildInfo.name-$buildInfo.debug-$compiler-obj/`).create
   }
 
 //////////////////////////////////////////////////////////////////////////
@@ -146,8 +146,18 @@ class CompileCpp
   }
 
   Void clean() {
-    outPodDir.delete
+    if (buildInfo.outType != TargetType.exe) {
+      outPodDir.delete
+    }
     objDir.delete
+  }
+
+  Void fixWin32([Str:Str] configs, Str key, Str value) {
+    v := configs[key]
+    if (v == null) return
+    if (v.contains(".bat")) return
+    v = v.replace(value, value+".bat")
+    configs[key] = v;
   }
 
   ** init. since dump test
@@ -160,7 +170,7 @@ class CompileCpp
     outFile = (outBinDir + buildInfo.name.toUri)
     outLibFile := (outBinDir +("lib"+buildInfo.name).toUri)
 
-    includeDir := buildInfo.includeDirs.first
+    
     meta =
     [
       "pod.name" : buildInfo.name,
@@ -170,14 +180,19 @@ class CompileCpp
       "pod.buildTime" : DateTime.now.toStr,
       "pod.compiler" : compiler
     ]
-    if (includeDir != null && includeDir.isDir) {
+    includeDir := buildInfo.installHeaders.first
+    if (buildInfo.installHeaders.size == 1 && buildInfo.includeDst == null && includeDir.isDir) {
       meta["pod.include"] = includeDir.pathStr
-    }
-    if (buildInfo.includeDst != null) {
-      meta.remove("pod.include")
     }
 
     configs = this.typeof.pod.props(`config.props`, 1min).dup
+    //temp fix emcc
+    if (Env.cur.os == "win32") {
+      fixWin32(configs, "emcc.ar", "emar")
+      fixWin32(configs, "emcc.name@{cpp}", "emcc")
+      fixWin32(configs, "emcc.name@{c}", "emcc")
+      fixWin32(configs, "emcc.link", "emcc")
+    }
     configs["outFile"] = fileToStr(outFile)
     configs["outLibFile"] = fileToStr(outLibFile)
     configs["cflags"] = ""
@@ -370,7 +385,7 @@ class CompileCpp
       dstIncludeDir = (outDir + `include/`).create
     }
 
-    copyInto(buildInfo.includeDirs, dstIncludeDir, true,
+    copyInto(buildInfo.installHeaders, dstIncludeDir, true,
     [
       "overwrite":true,
       "exclude":|File f->Bool|

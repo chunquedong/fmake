@@ -144,7 +144,7 @@ class Generator {
 			out.print("  ${toPath(it)}\n")
 		}
 
-		buildInfo.includeDirs.each |incdir| {
+		buildInfo.installHeaders.each |incdir| {
 			incdir.toFile.walk |f| {
 				if (f.ext == "h" || f.ext == "hpp" || f.ext == "inl") {
 					out.print("  ${toPath(f.uri)}\n")
@@ -206,7 +206,7 @@ class Generator {
 	}
 
 	private Void copyHeaderFile(|Uri,Uri| cb) {
-		buildInfo.includeDirs.each |incdir| {
+		buildInfo.installHeaders.each |incdir| {
 			incdir.toFile.walk |f| {
 				if (f.ext == "h" || f.ext == "hpp" || f.ext == "inl") {
 					rel := f.uri.relTo(incdir)
@@ -259,7 +259,7 @@ class Generator {
 		out.printLine("")
 
 		out.printLine("HEADERS += \\")
-		buildInfo.includeDirs.each |incdir| {
+		buildInfo.installHeaders.each |incdir| {
 			incdir.toFile.walk |f| {
 				if (f.ext == "h" || f.ext == "hpp" || f.ext == "inl") {
 					out.print("  ${toPath(f.uri)} \\\n")
@@ -314,16 +314,22 @@ class Generator {
 	          dstIncludeDir = (`include/`)
 	        }
 
-			buildInfo.includeDirs.each |incdir| {
+			buildInfo.installHeaders.each |incdir| {
 				incOut := toPath(outPodDir+dstIncludeDir, true)
-				incFrom := toPath(incdir, true, "*.h")
-				out.printLine("QMAKE_POST_LINK += \$\$QMAKE_COPY_DIR $incFrom $incOut \$\$escape_expand(\\n\\t)")
+				if (incdir.isDir) {
+					incFrom := toPath(incdir, true, "*.h")
+					out.printLine("QMAKE_POST_LINK += \$\$QMAKE_COPY_DIR $incFrom $incOut \$\$escape_expand(\\n\\t)")
 
-				incFrom = toPath(incdir, true, "*.hpp")
-				out.printLine("QMAKE_POST_LINK += \$\$QMAKE_COPY_DIR $incFrom $incOut \$\$escape_expand(\\n\\t)")
+					incFrom = toPath(incdir, true, "*.hpp")
+					out.printLine("QMAKE_POST_LINK += \$\$QMAKE_COPY_DIR $incFrom $incOut \$\$escape_expand(\\n\\t)")
 
-				incFrom = toPath(incdir, true, "*.inl")
-				out.printLine("QMAKE_POST_LINK += \$\$QMAKE_COPY_DIR $incFrom $incOut \$\$escape_expand(\\n\\t)")
+					incFrom = toPath(incdir, true, "*.inl")
+					out.printLine("QMAKE_POST_LINK += \$\$QMAKE_COPY_DIR $incFrom $incOut \$\$escape_expand(\\n\\t)")
+				}
+				else {
+					incFrom := toPath(incdir, true)
+					out.printLine("QMAKE_POST_LINK += \$\$QMAKE_COPY_DIR $incFrom $incOut \$\$escape_expand(\\n\\t)")
+				}
 			}
 	    }
 	}

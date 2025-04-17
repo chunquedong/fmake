@@ -6,7 +6,7 @@
 ### Features
 
 - 声明式的配置构建脚本
-- 跨平台，支持gcc、msvc等编译器
+- 跨平台，支持gcc、msvc、emscripten等编译器
 - 生成 Visual Studio、 XCode 项目文件
 - 依赖管理库
 
@@ -25,6 +25,7 @@
 ./vsvars.sh
 ```
 在运行之前你可能你需要修改vsvars.sh文件里面的路径。
+[详细信息参见这里](https://learn.microsoft.com/en-us/cpp/build/building-on-the-command-line?view=msvc-170)
 
 ### 用法
 
@@ -46,11 +47,11 @@
 ```
 debug模式编译:
 ```
-  fan fmake -d  fmake.props
+  fan fmake -d fmake.props
 ```
 清理后重新编译:
 ```
-  fan fmake -f  fmake.props
+  fan fmake -f fmake.props
 ```
 指定编译器:
 ```
@@ -60,7 +61,7 @@ debug模式编译:
 #### 生成IDE项目文件
 需要安装cmake.
 ```
-  fan fmake -G  fmake.props
+  fan fmake -G -debug fmake.props
 ```
 
 #### 构建脚本细节
@@ -107,26 +108,21 @@ msvc.define = ...
 
 ### 包仓库
 
-包仓库是个固定结构的文件夹，不设计网络操作。
-
-数据位置可以在这里配置 fanx/etc/fmake/config.props:
-``
-fmakeRepo=/D:/fmakeRepo/
-``
+包仓库是个固定结构的文件夹，没有网络操作。
 
 目录结构
 ```
-   |_lib
-      |_java
-      |_donet
-      |_fan
-      |_cpp
-        |_pro1
+fmakeRepo
+   |_msvc
+      |_emcc
+      |_msvc
+      |_gcc
+        |_pro1-1.0-debug
         |  |_bin
         |  |_include
         |  |_obj
         |  |_lib
-        |_pro2
+        |_pro2-1.0-debug
         |  |_bin
         |  |_include
         |  |_obj
@@ -135,17 +131,6 @@ fmakeRepo=/D:/fmakeRepo/
 
 ```
 
-### WebAssembly Emscripten
-
-fanx/etc/fmake/config.props:
-```
-gcc.home=/D:/workspace/source/emsdk/upstream/emscripten/
-gcc.name@{cpp}=emcc.bat @{cppflags} -pthread
-gcc.name@{c}=emcc.bat @{cflags} -pthread
-gcc.ar=emar.bat
-gcc.link=emcc.bat -pthread
-gcc.exe=@{gcc.link} @{linkflags} -o @{outFile}.js @{gcc.objList} @{gcc.libDirs} @{gcc.libNames}
-```
 
 ### 做更多的任务
 

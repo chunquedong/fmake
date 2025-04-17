@@ -6,7 +6,7 @@ Declarative C++ build tool
 ### Features
 
 - Declarative make file script
-- Cross-platform and support gcc msvc
+- Cross-platform and support gcc, msvc, emscripten
 - Generate Visual Studio and XCode project file
 - Dependency Package Management
 
@@ -25,6 +25,7 @@ Build from source:
 ./vsvars.sh
 ```
 You might need to eidt the path in the vsvars.sh file.
+[See also](https://learn.microsoft.com/en-us/cpp/build/building-on-the-command-line?view=msvc-170)
 
 ### Usage
 
@@ -60,7 +61,7 @@ special compiler:
 #### Generate project files
 require install cmake.
 ```
-  fan fmake -G fmake.props
+  fan fmake -G -debug fmake.props
 ```
 
 #### Build script detail
@@ -107,23 +108,18 @@ msvc.define = ...
 
 ### Package Repository
 
-The output path setting in fanx/etc/fmake/config.props:
-``
-fmakeRepo=/D:/fmakeRepo/
-``
-
 ```
-   |_lib
-      |_java
-      |_donet
-      |_fan
-      |_cpp
-        |_pro1
+fmakeRepo
+   |_msvc
+      |_emcc
+      |_msvc
+      |_gcc
+        |_pro1-1.0-debug
         |  |_bin
         |  |_include
         |  |_obj
         |  |_lib
-        |_pro2
+        |_pro2-1.0-debug
         |  |_bin
         |  |_include
         |  |_obj
@@ -132,17 +128,6 @@ fmakeRepo=/D:/fmakeRepo/
 
 ```
 
-### Emscripten
-
-fanx/etc/fmake/config.props:
-```
-gcc.home=/D:/workspace/source/emsdk/upstream/emscripten/
-gcc.name@{cpp}=emcc.bat @{cppflags}
-gcc.name@{c}=emcc.bat @{cflags}
-gcc.ar=emar.bat
-gcc.link=emcc.bat
-gcc.exe=@{gcc.link} @{linkflags} -o @{outFile}.js @{gcc.objList} @{gcc.libDirs} @{gcc.libNames}
-```
 
 ### Do More Task
 

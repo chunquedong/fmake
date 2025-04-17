@@ -31,3 +31,21 @@ gcc.lib=@{gcc.ar} -vcqs @{outLibFile}.a @{gcc.objList}
 gcc.exe=@{gcc.link} @{linkflags} -o @{outFile} @{gcc.objList} @{gcc.libDirs} @{gcc.libNames}
 gcc.dll=@{gcc.link} @{linkflags} -shared -o @{outLibFile}.so @{gcc.objList} @{gcc.libDirs} @{gcc.libNames}
 
+
+emcc.defines=[-D@{defines}]
+emcc.libDirs=[-L@{libDirs}]
+emcc.incDirs=[-I@{incDirs}]
+emcc.libNames=[-l@{libNames}]
+emcc.objList=[@{objList}]
+
+emcc.flags@{debug}=-D_DEBUG -g
+emcc.flags@{release}=-DNDEBUG -O3
+emcc.name@{cpp}=emcc @{cppflags}
+emcc.name@{c}=emcc @{cflags}
+emcc.ar=emar
+emcc.link=emcc -g
+
+emcc.comp=@{emcc.name} -c -fPIC -fpermissive -Wall @{emcc.flags} @{emcc.defines} @{emcc.incDirs} -o @{objFile} @{srcFile}
+emcc.lib=@{emcc.ar} -vcqs @{outLibFile}.a @{emcc.objList}
+emcc.exe=@{emcc.link} @{linkflags} -o @{outFile}.js @{emcc.objList} @{emcc.libDirs} @{emcc.libNames}
+emcc.dll=@{emcc.link} @{linkflags} -shared -o @{outLibFile}.so @{emcc.objList} @{emcc.libDirs} @{emcc.libNames}
