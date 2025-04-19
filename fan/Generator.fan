@@ -19,26 +19,27 @@ class Generator {
 
 	Void run() {
 		isQmake = true
-		qout := (outDir + `${buildInfo.name}.pro`).out
+		qout := (outDir + `${buildInfo.name}-${buildInfo.debug}.pro`).out
 		genQmake(qout)
 		qout.close
-		echo(outDir + `${buildInfo.name}.pro`)
+		echo(outDir + `${buildInfo.name}-${buildInfo.debug}.pro`)
 
 		isQmake = false
-		out := (outDir + `${buildInfo.name}/CMakeLists.txt`).out
+		cmakeDir := outDir + `cmake-${buildInfo.name}-${buildInfo.debug}/`
+		out := (cmakeDir+`CMakeLists.txt`).out
 		genCmake(out)
 		out.close
-		exe
+		echo(cmakeDir)
+		exe(cmakeDir)
 	}
 
-	private Void exe() {
+	private Void exe(File cmakeDir) {
 		cmds := ["cmake", "."]
 		if (Env.cur.os == "win32") {
 			cmds.add("-A").add("x64")
 		}
 		try {
-		  dir := buildInfo.scriptDir + `../build/${buildInfo.name}/`
-	      process := Process(cmds, dir.toFile)
+	      process := Process(cmds, cmakeDir)
 	      log.info("Exec $cmds")
 	      result := process.run.join
 	      if (result != 0) throw Err("Exec failed [$cmds]")

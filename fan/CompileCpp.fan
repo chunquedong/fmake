@@ -47,7 +47,7 @@ class CompileCpp
     compiler = buildInfo.compiler
     compHome = config(compiler+".home", "")
     outPodDir = (buildInfo.outDir + ("$buildInfo.name-$buildInfo.version-$buildInfo.debug/").toUri).toFile
-    objDir = File(buildInfo.scriptDir+`../build/$buildInfo.name-$buildInfo.debug-$compiler-obj/`).create
+    objDir = File(buildInfo.scriptDir+`../build/obj-$buildInfo.name-$compiler-$buildInfo.debug/`).create
   }
 
 //////////////////////////////////////////////////////////////////////////
