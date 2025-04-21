@@ -22,9 +22,8 @@
 
 ### 从shell使用微软C++工具集:
 ```
-./vsvars.sh
+source vsvars.sh
 ```
-在运行之前你可能你需要修改vsvars.sh文件里面的路径。
 [详细信息参见这里](https://learn.microsoft.com/en-us/cpp/build/building-on-the-command-line?view=msvc-170)
 
 ### 用法

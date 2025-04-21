@@ -22,9 +22,8 @@ Build from source:
 
 ### Use the Microsoft C++ toolset from the shell:
 ```
-./vsvars.sh
+source vsvars.sh
 ```
-You might need to eidt the path in the vsvars.sh file.
 [See also](https://learn.microsoft.com/en-us/cpp/build/building-on-the-command-line?view=msvc-170)
 
 ### Usage
