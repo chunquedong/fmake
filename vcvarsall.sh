@@ -152,7 +152,7 @@ function main() {
       # PATH is a special case, requiring special handling
       local new_paths
       new_paths=$(pathlist_win_to_unix "$value")             # Convert to unix-style path list
-      new_paths=$(pathlist_normalize "${PATH}:${new_paths}") # Prepend the current PATH
+      new_paths=$(pathlist_normalize "${new_paths}:${PATH}") # Prepend the current PATH
       export_env 'WINDOWS_PATH' "$value"
       export_env 'PATH' "$new_paths"
       ;;
