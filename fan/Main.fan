@@ -24,6 +24,9 @@ class Main : AbstractMain
   @Opt { help = "compiler name"; aliases=["c"] }
   Str? compiler := null
 
+  @Opt { help = "execute build result file"; }
+  Bool execute = false
+
   @Arg { help = "build script" }
   File? scriptFile
 
@@ -35,6 +38,9 @@ class Main : AbstractMain
     build := BuildCpp()
     if (debug) {
       build.debug = "debug"
+    }
+    if (execute) {
+      build.execute = execute
     }
     if (compiler != null) {
       build.compiler = compiler

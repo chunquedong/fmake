@@ -128,6 +128,10 @@ class CompileCpp
       install
 
       log.info("BUILD SUCCESS")
+
+      if (buildInfo.execute && (buildInfo.outType == TargetType.exe)) {
+        exeBin
+      }
     } catch (Err e) {
       log.info(e.msg)
       e.trace
@@ -312,6 +316,10 @@ class CompileCpp
 
   }
 
+  private Void exeBin() {
+    Process([outFile.osPath]).run.join
+  }
+  
 //////////////////////////////////////////////////////////////////////////
 // Compile
 //////////////////////////////////////////////////////////////////////////
