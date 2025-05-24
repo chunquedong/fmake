@@ -289,6 +289,7 @@ class CompileCpp
         val := macros[key]
         if (val == null) throw Err("Undefined macro key: $key")
         s = s[0..<i] + val + s[c+1..-1]
+        --i
       }
     }
     return s
