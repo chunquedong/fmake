@@ -104,6 +104,13 @@ gcc.define = ...
 msvc.define = ...
 ```
 
+### Configuration
+Create the configuration file: fanx/env/etc/fmake/config.props
+
+You can rewrite config.props to customize configurations, for example:
+```
+emcc.home=C:/soft/emsdk/upstream/emscripten/
+```
 
 ### Package Repository
 

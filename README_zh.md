@@ -104,6 +104,13 @@ gcc.define = ...
 msvc.define = ...
 ```
 
+### 配置
+创建配置文件fanx/env/etc/fmake/config.props
+
+可以用来重新config.props中的配置, 例如:
+```
+emcc.home=C:/soft/emsdk/upstream/emscripten/
+```
 
 ### 包仓库
 

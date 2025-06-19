@@ -391,6 +391,7 @@ class BuildCpp
     }
 
     applayDepends(checkError)
+    libs.reverse
     validate
   }
 
