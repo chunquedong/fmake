@@ -184,9 +184,19 @@ class CompileCpp
       "pod.buildTime" : DateTime.now.toStr,
       "pod.compiler" : compiler
     ]
-    includeDir := buildInfo.installHeaders.first
-    if (buildInfo.installHeaders.size == 1 && buildInfo.includeDst == null && includeDir.isDir) {
-      meta["pod.include"] = includeDir.pathStr
+
+    if (buildInfo.includeDst == null) {
+      includes := [,]
+      for (i:=0; i<buildInfo.installHeaders.size; ++i) {
+        includeDir := buildInfo.installHeaders[i]
+        if (includeDir.isDir) {
+          includes.add(includeDir.pathStr)
+        }
+      }
+      if (includes.size > 0) {
+        meta["pod.includes"] = includes.join(",")
+      }
+      meta["pod.includesRewrite"] = (includes.size == buildInfo.installHeaders.size).toStr
     }
 
     configs = this.typeof.pod.props(`config.props`, 1min).dup
