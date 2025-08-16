@@ -46,7 +46,7 @@ class CompileCpp
     this.buildInfo = buildInfo
     compiler = buildInfo.compiler
     compHome = config(compiler+".home", "")
-    outPodDir = (buildInfo.outDir + ("$buildInfo.name-$buildInfo.version-$buildInfo.debug/").toUri).toFile
+    outPodDir = (buildInfo.outDir + ("$buildInfo.name-$buildInfo.version/").toUri).toFile
     objDir = File(buildInfo.scriptDir+`../build/obj-$buildInfo.name-$compiler-$buildInfo.debug/`).create
   }
 
@@ -430,7 +430,7 @@ class CompileCpp
       if (buildInfo.installGlobal) {
         copyHeaderFile(buildInfo.outDir.toFile)
 
-        libDirs := (buildInfo.outDir + `lib-${buildInfo.debug}/`).toFile.create
+        libDirs := (buildInfo.outDir + `lib/`).toFile.create
         (outPodDir+`lib/`).copyTo(libDirs, ["overwrite":true])
       }
     }

@@ -120,18 +120,16 @@ fmakeRepo
       |_emcc
       |_msvc
       |_gcc
-        |_pro1-1.0-debug
-        |  |_bin
-        |  |_include
-        |  |_obj
-        |  |_lib
-        |_pro2-1.0-debug
-        |  |_bin
-        |  |_include
-        |  |_obj
-        |  |_lib
-        |...
-
+        |_debug
+        |  |_pro1-1.0
+        |    |_bin
+        |    |_include
+        |    |_lib
+        |_release
+        |  |_pro1-1.0
+        |    |_bin
+        |    |_include
+        |    |_lib
 ```
 
 
