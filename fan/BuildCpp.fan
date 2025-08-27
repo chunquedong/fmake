@@ -280,6 +280,10 @@ class BuildCpp
         metaPath := outHome + `${it.name}/meta.props`
         if (metaPath.exists) {
           meta := metaPath.in.readProps
+          rversion := Version(meta.get("pod.version"))
+          if (!it.match(rversion)) {
+            fatal("Cannot resolve depend: '$it.name $rversion' != '$it'")
+          }
           includesRewrite = meta.get("pod.includesRewrite") == "true"
           includes := meta.get("pod.includes")
           if (includes != null) {
