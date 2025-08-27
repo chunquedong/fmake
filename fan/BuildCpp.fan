@@ -277,7 +277,7 @@ class BuildCpp
       depends.each
       {
         includesRewrite := false
-        metaPath := outHome + `${it.name}-${it.version}/meta.props`
+        metaPath := outHome + `${it.name}/meta.props`
         if (metaPath.exists) {
           meta := metaPath.in.readProps
           includesRewrite = meta.get("pod.includesRewrite") == "true"
@@ -295,7 +295,7 @@ class BuildCpp
           }
         }
         if (!includesRewrite) {
-          dep := outHome + `${it.name}-${it.version}/include/`
+          dep := outHome + `${it.name}/include/`
           if (!dep.exists) {
             if (checkError) {
               throw fatal("don't find the depend $it")
@@ -307,7 +307,7 @@ class BuildCpp
           incDirs.add(dep.uri)
         }
 
-        dep := outHome + `${it.name}-${it.version}/lib/`
+        dep := outHome + `${it.name}/lib/`
         if (!dep.exists) {
           if (checkError) {
             throw fatal("don't find the depend $it")
@@ -321,7 +321,7 @@ class BuildCpp
 
       depends.each
       {
-        dep := outHome + `${it.name}-${it.version}/lib/`
+        dep := outHome + `${it.name}/lib/`
         count := 0
         dep.listFiles.each
         {

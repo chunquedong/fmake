@@ -46,7 +46,7 @@ class CompileCpp
     this.buildInfo = buildInfo
     compiler = buildInfo.compiler
     compHome = config(compiler+".home", "")
-    outPodDir = (buildInfo.outDir + ("$buildInfo.name-$buildInfo.version/").toUri).toFile
+    outPodDir = (buildInfo.outDir + ("$buildInfo.name/").toUri).toFile
     objDir = File(buildInfo.scriptDir+`../build/obj-$buildInfo.name-$compiler-$buildInfo.debug/`).create
   }
 
@@ -380,6 +380,8 @@ class CompileCpp
           log.warn("not found include file: $f, in: $srcFile")
           continue
         }
+        depend = depend.normalize
+        //echo("isDirty:$depend")
         if (isDirty(depend, time)) {
           fileDirtyMap[srcFile] = true
           return true

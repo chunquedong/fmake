@@ -163,7 +163,7 @@ class Generator {
 
 
 		//set lib output dir
-		outPodDir := (buildInfo.outDir + ("$buildInfo.name-$buildInfo.version/").toUri)
+		outPodDir := (buildInfo.outDir + ("$buildInfo.name/").toUri)
 		out.printLine("set_target_properties ($buildInfo.name PROPERTIES ")
 		Str? libOut
 		if (buildInfo.outType == TargetType.exe) {
@@ -287,7 +287,7 @@ class Generator {
     	}
 
 
-		outPodDir := (buildInfo.outDir + ("$buildInfo.name-$buildInfo.version/").toUri)
+		outPodDir := (buildInfo.outDir + ("$buildInfo.name/").toUri)
 		Str? libOut
 		if (buildInfo.outType == TargetType.exe) {
 			libOut = toPath(outPodDir+`bin/`)
