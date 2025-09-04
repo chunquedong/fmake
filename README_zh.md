@@ -107,7 +107,7 @@ msvc.define = ...
 ### 配置
 创建配置文件fanx/env/etc/fmake/config.props
 
-可以用来重新config.props中的配置, 例如:
+可以用来重写config.props中的配置, 例如:
 ```
 emcc.home=C:/soft/emsdk/upstream/emscripten/
 ```
@@ -124,12 +124,12 @@ fmakeRepo
       |_msvc
       |_gcc
         |_debug
-        |  |_pro1-1.0
+        |  |_pro1
         |    |_bin
         |    |_include
         |    |_lib
         |_release
-        |  |_pro1-1.0
+        |  |_pro1
         |    |_bin
         |    |_include
         |    |_lib

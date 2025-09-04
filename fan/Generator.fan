@@ -22,14 +22,14 @@ class Generator {
 		qout := (outDir + `${buildInfo.name}-${buildInfo.debug}.pro`).out
 		genQmake(qout)
 		qout.close
-		echo(outDir + `${buildInfo.name}-${buildInfo.debug}.pro`)
+		log.info("Generate QMake file: "+outDir + `${buildInfo.name}-${buildInfo.debug}.pro`)
 
 		isQmake = false
 		cmakeDir := outDir + `cmake-${buildInfo.name}-${buildInfo.debug}/`
 		out := (cmakeDir+`CMakeLists.txt`).out
 		genCmake(out)
 		out.close
-		echo(cmakeDir)
+		log.info("Generate CMake file: "+cmakeDir)
 		exe(cmakeDir)
 	}
 
@@ -42,9 +42,9 @@ class Generator {
 	      process := Process(cmds, cmakeDir)
 	      log.info("Exec $cmds")
 	      result := process.run.join
-	      if (result != 0) throw Err("Exec failed [$cmds]")
+	      if (result != 0) log.err("Exec failed [$cmds]")
 	    } catch (Err err) {
-	      throw Err("Exec failed [$cmds]")
+	      log.err("Exec failed [$cmds]")
 	    }
 	}
 

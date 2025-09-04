@@ -89,7 +89,7 @@ class CompileCpp
   **
   Void run()
   {
-    log.info("compile [${buildInfo.scriptDir.name}] $compiler")
+    log.info("Compile module: ${buildInfo.scriptDir.name} compiler: $compiler")
 
     try {
       init
@@ -321,7 +321,7 @@ class CompileCpp
     if (lib != null)
       process.env["LIB"] = lib.split(';').map{it.toUri.toFile.osPath}.join(";")
     
-    log.info("Exec $cmds")
+    log.info("Exec $cmd")
     result := process.run.join
     if (result != 0) throw fatal("Exec failed [$cmd]")
 

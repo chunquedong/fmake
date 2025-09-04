@@ -369,6 +369,7 @@ class BuildCpp
   }
 
   Void parse(Uri scriptFile, Bool checkError) {
+    log.info("Input $scriptFile")
     scriptDir = scriptFile.parent
     props := scriptFile.toFile.in.readProps
     osParse("", props)

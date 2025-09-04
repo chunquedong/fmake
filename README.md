@@ -121,12 +121,12 @@ fmakeRepo
       |_msvc
       |_gcc
         |_debug
-        |  |_pro1-1.0
+        |  |_pro1
         |    |_bin
         |    |_include
         |    |_lib
         |_release
-        |  |_pro1-1.0
+        |  |_pro1
         |    |_bin
         |    |_include
         |    |_lib
