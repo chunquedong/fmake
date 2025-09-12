@@ -389,6 +389,8 @@ class BuildCpp
     }
     osParse(compiler+".", props)
 
+    osParse(Env.cur.os+"-"+compiler+".", props)
+
     installGlobal = Env.cur.config(this.typeof.pod, "installGlobal", "false") == "true"
 
     excludeRegex := excludeSrc == null ? null : Regex.fromStr(excludeSrc)

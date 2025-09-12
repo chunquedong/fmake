@@ -28,12 +28,10 @@ class Main : AbstractMain
   Bool execute = false
 
   @Arg { help = "build script" }
-  File? scriptFile
+  Str? scriptPath
 
   override Int run() {
-    if (scriptFile == null) {
-      scriptFile = File.os("fmake.props")
-    }
+    File scriptFile = File.os(scriptPath ?: "fmake.props")
 
     build := BuildCpp()
     if (debug) {
