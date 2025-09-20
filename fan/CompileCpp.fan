@@ -89,7 +89,7 @@ class CompileCpp
   **
   Void run()
   {
-    log.info("Compile module: ${buildInfo.scriptDir.name} compiler: $compiler")
+    log.info("Compile module: ${buildInfo.name} compiler: $compiler")
 
     try {
       init
