@@ -24,7 +24,7 @@ gcc.objList=[@{objList}]
 gcc.flags@{debug}=-D_DEBUG -g
 gcc.flags@{release}=-DNDEBUG -O3
 gcc.linkflags@{debug}=-g @{linkflags}
-gcc.linkflags@{release}=-O3 -s -flto=auto @{linkflags}
+gcc.linkflags@{release}=-O3 -flto=auto @{linkflags}
 gcc.name@{cpp}=g++ @{cppflags}
 gcc.name@{c}=gcc @{cflags}
 gcc.ar=ar
@@ -45,7 +45,7 @@ emcc.objList=[@{objList}]
 emcc.flags@{debug}=-D_DEBUG -g
 emcc.flags@{release}=-DNDEBUG -O3
 emcc.linkflags@{debug}=-g @{linkflags}
-emcc.linkflags@{release}=-O3 -s -flto=auto @{linkflags}
+emcc.linkflags@{release}=-O3 -flto=auto @{linkflags}
 emcc.name@{cpp}=emcc @{cppflags}
 emcc.name@{c}=emcc @{cflags}
 emcc.ar=emar
