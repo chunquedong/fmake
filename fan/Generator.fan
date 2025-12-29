@@ -50,7 +50,9 @@ class Generator {
 
 	private Str toPath(Uri uri, Bool keepPath = false, Str? filter = null) {
 		rel := uri.relTo(buildInfo.scriptDir)
-
+		if (rel.pathStr.size == 0) {
+			rel = `./`
+		}
 		path := rel.toFile.osPath
 
 		if (rel.pathStr != uri.pathStr) {
