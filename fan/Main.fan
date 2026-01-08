@@ -46,7 +46,7 @@ class Main : AbstractMain
     build.parse(scriptFile.normalize.uri, !generate && !dump)
 
     if (generate) {
-      Generator(build).run
+      Generator(build).run(force)
     }
     else if (dump) {
       build.dump

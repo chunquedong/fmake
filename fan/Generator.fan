@@ -17,7 +17,7 @@ class Generator {
 		}
 	}
 
-	Void run() {
+	Void run(Bool clean) {
 		isQmake = true
 		qout := (outDir + `${buildInfo.name}-${buildInfo.debug}.pro`).out
 		genQmake(qout)
@@ -26,6 +26,10 @@ class Generator {
 
 		isQmake = false
 		cmakeDir := outDir + `cmake-${buildInfo.name}-${buildInfo.debug}/`
+		if (clean) {
+			cmakeDir.delete
+		}
+		cmakeDir.create
 		out := (cmakeDir+`CMakeLists.txt`).out
 		genCmake(out)
 		out.close

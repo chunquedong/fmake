@@ -374,7 +374,7 @@ class BuildCpp
     props := scriptFile.toFile.in.readProps
     osParse("", props)
     if (Env.cur.os != "win32") {
-      osParse("non-win", props)
+      osParse("non-win.", props)
     }
     osParse(Env.cur.os+".", props)
 
