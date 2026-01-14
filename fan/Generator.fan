@@ -4,16 +4,16 @@ class Generator {
 	private BuildCpp buildInfo
 	private Log log := Log.get("fmake")
 	private File outDir
-	private Uri? fmakeRepo
+	private Uri? fmakeRepoLib
 	private Bool isQmake
 
 	new make(BuildCpp buildInfo) {
 		this.buildInfo = buildInfo
 		outDir = (buildInfo.scriptDir + `../build/`).toFile
 		outDir.create
-		fmakeRepoStr := Env.cur.vars["FMAKE_REPO"]
-		if (fmakeRepoStr != null) {
-			fmakeRepo = File.os(fmakeRepoStr).uri
+		fmakeRepo := Env.cur.vars["FMAKE_REPO"]
+		if (fmakeRepo != null) {
+			fmakeRepoLib = File.os(fmakeRepo).uri + `$buildInfo.compiler/${buildInfo.debug}/`
 		}
 	}
 
@@ -68,14 +68,14 @@ class Generator {
 				path = "../../$parentName/"+path
 			}
 		}
-		else if (fmakeRepo != null) {
-			rel = uri.relTo(fmakeRepo)
+		else if (fmakeRepoLib != null) {
+			rel = uri.relTo(fmakeRepoLib)
 			if (rel != uri) {
 				if (isQmake) {
-					path = "\$\$(FMAKE_REPO)/"+rel.toFile.osPath
+					path = "\$\$(FMAKE_REPO_LIB)/"+rel.toFile.osPath
 				}
 				else {
-					path = "\$ENV{FMAKE_REPO}/"+rel.toFile.osPath
+					path = "\${FMAKE_REPO_LIB}/"+rel.toFile.osPath
 				}
 			}
 		}
@@ -103,14 +103,25 @@ class Generator {
 		out.printLine("cmake_minimum_required (VERSION 3.0)")
 		out.printLine("project (${buildInfo.name}_ws)")
 
+		out.printLine("if(DEFINED ENV{FMAKE_REPO})");
+		out.printLine("  set(FMAKE_REPO_LIB \"\$ENV{FMAKE_REPO}/$buildInfo.compiler/${buildInfo.debug}\")");
+		out.printLine("else()");
+		defaultRepoLib := buildInfo.outDir.toFile.osPath
+		if (Env.cur.os == "win32") {
+			defaultRepoLib = defaultRepoLib.replace("\\", "/")
+		}
+		out.printLine("  set(FMAKE_REPO_LIB \"${defaultRepoLib}\")");
+		out.printLine("endif()");
+
+
 		cflags := buildInfo.extConfigs["cflags"]
 		cppflags := buildInfo.extConfigs["cppflags"]
 
 		if (cflags != null) {
-			out.printLine("list(APPEND CMAKE_C_FLAGS $cflags)")
+			out.printLine("set(CMAKE_C_FLAGS \"\${CMAKE_C_FLAGS} $cflags\")")
 		}
 		if (cppflags != null) {
-			out.printLine("list(APPEND CMAKE_CXX_FLAGS $cppflags)")
+			out.printLine("set(CMAKE_CXX_FLAGS \"\${CMAKE_CXX_FLAGS} $cppflags\")")
 		}
 
 		if (buildInfo.debug == "debug") {
@@ -243,6 +254,17 @@ class Generator {
 	    else if (buildInfo.outType == TargetType.dll) {
 	    	out.printLine("TEMPLATE = lib")
 	    }
+
+
+		out.printLine("!isEmpty(\$(FMAKE_REPO)) {");
+		out.printLine("  FMAKE_REPO_LIB = \$(FMAKE_REPO)/$buildInfo.compiler/${buildInfo.debug}");
+		out.printLine("} else {");
+		defaultRepoLib := buildInfo.outDir.toFile.osPath
+		if (Env.cur.os == "win32") {
+			defaultRepoLib = defaultRepoLib.replace("\\", "/")
+		}
+		out.printLine("  FMAKE_REPO_LIB = \"${defaultRepoLib}\"");
+		out.printLine("}");
 
 
 		cflags := buildInfo.extConfigs["cflags"]
