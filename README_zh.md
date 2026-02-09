@@ -13,12 +13,12 @@
 
 ### Install
 
-需要现安装 [Fanx runtime](https://github.com/fanx-dev/fanx/blob/master/doc/QuickStart.md).
-
 从源码构建:
 ```
-  fanb pod.props
+  sh build.sh
 ```
+
+添加bin/目录到你的环境变量PATH
 
 ### 从shell使用微软C++工具集:
 ```
@@ -42,25 +42,25 @@ source vsvars.sh
 ```
 编译:
 ```
-  fan fmake fmake.props
+  fmake fmake.props
 ```
 debug模式编译:
 ```
-  fan fmake -d fmake.props
+  fmake -d fmake.props
 ```
 清理后重新编译:
 ```
-  fan fmake -f fmake.props
+  fmake -f fmake.props
 ```
 指定编译器:
 ```
-  fan fmake fmake.props -c gcc
+  fmake fmake.props -c gcc
 ```
 
 #### 生成IDE项目文件
 需要安装cmake.
 ```
-  fan fmake -G -debug fmake.props
+  fmake -G -debug fmake.props
 ```
 
 #### 构建脚本细节
@@ -106,7 +106,7 @@ msvc.define = ...
 ```
 
 ### 配置
-创建配置文件fanx/env/etc/fmake/config.props
+创建配置文件bin/config.props
 
 可以用来重写config.props中的配置, 例如:
 ```

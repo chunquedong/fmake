@@ -13,12 +13,13 @@ Declarative C++ build tool
 
 ### Install
 
-It depends on [Fanx runtime](https://github.com/fanx-dev/fanx/blob/master/doc/QuickStart.md).
 
 Build from source:
 ```
-  fanb pod.props
+  sh build.sh
 ```
+
+Add bin/ to your PATH.
 
 ### Use the Microsoft C++ toolset from the shell:
 ```
@@ -42,25 +43,25 @@ build script 'fmake.props':
 ```
 compile:
 ```
-  fan fmake fmake.props
+  fmake fmake.props
 ```
 debug compile:
 ```
-  fan fmake -d fmake.props
+  fmake -d fmake.props
 ```
 clean and compile:
 ```
-  fan fmake -f fmake.props
+  fmake -f fmake.props
 ```
 special compiler:
 ```
-  fan fmake fmake.props -c gcc
+  fmake fmake.props -c gcc
 ```
 
 #### Generate project files
 require install cmake.
 ```
-  fan fmake -G -debug fmake.props
+  fmake -G -debug fmake.props
 ```
 
 #### Build script detail
@@ -106,7 +107,7 @@ msvc.define = ...
 ```
 
 ### Configuration
-Create the configuration file: fanx/env/etc/fmake/config.props
+Create the configuration file: bin/config.props
 
 You can rewrite config.props to customize configurations, for example:
 ```

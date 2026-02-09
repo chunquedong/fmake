@@ -1,0 +1,6 @@
+name = fmake
+summary = Declarative C++ build tool
+outType = exe
+version = 3.0
+srcDirs = src/
+incDir = src/
