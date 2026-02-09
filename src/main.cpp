@@ -68,6 +68,7 @@ int main(int argc, char* argv[]) {
         std::cerr << "Error: Script file not found: " << scriptPath << std::endl;
         return 1;
     }
+    scriptFile = fs::absolute(scriptFile);
 
     BuildCpp build;
     if (debug) {
