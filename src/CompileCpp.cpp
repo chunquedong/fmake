@@ -6,11 +6,13 @@
 #include <cstdlib>
 #include <chrono>
 #include <algorithm>
+#include <string.h>
 
 
 CompileCpp::CompileCpp(const BuildCpp& buildInfo) : buildInfo(buildInfo), version(buildInfo.version) {
     compiler = buildInfo.compiler;
-    configs = Utils::loadConfigs(buildInfo.scriptDir);
+    Utils::loadConfigs(buildInfo.scriptDir, configs, "config_compiler.props");
+    Utils::loadConfigs(buildInfo.scriptDir, configs, "config.props");
     if (configs.size() == 0) {
         Utils::throwError("Load config.props file fail");
     }
@@ -594,9 +596,10 @@ void CompileCpp::copyInto(const std::vector<fs::path>& src, const fs::path& dir,
         } else {
             if (overwrite || !fs::exists(dst)) {
                 fs::create_directories(dst.parent_path());
+                fs::path dstPath = dst / f.filename();
                 std::string ext = f.extension().generic_string();
                 if (!filter || ext == ".h" || ext == ".hpp" || ext == ".inl") {
-                    fs::copy(f, dst, fs::copy_options::overwrite_existing);
+                    fs::copy(f, dstPath, fs::copy_options::overwrite_existing);
                 }
             }
         }

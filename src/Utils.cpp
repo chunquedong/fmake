@@ -105,22 +105,13 @@ std::vector<std::string> Utils::split(const std::string& str, char delimiter) {
     return result;
 }
 
-std::map<std::string, std::string> Utils::loadConfigs(const fs::path& scriptDir) {
-    std::map<std::string, std::string> configs;
+void Utils::loadConfigs(const fs::path& scriptDir, std::map<std::string, std::string>& configs, const char* file) {
     
     // Load config files in order of increasing priority
     // 1. Executable directory (lowest priority)
     fs::path exePath = Utils::exePath();
     if (!exePath.empty()) {
-        fs::path configFile = exePath.parent_path() / "config_compiler.props";
-        if (fs::exists(configFile)) {
-            auto configPropsMap = Utils::readProps(configFile);
-            for (const auto& [k, v] : configPropsMap) {
-                configs[k] = v;
-            }
-        }
-
-        configFile = exePath.parent_path() / "config.props";
+        fs::path configFile = exePath.parent_path() / file;
         if (fs::exists(configFile)) {
             auto configPropsMap = Utils::readProps(configFile);
             for (const auto& [k, v] : configPropsMap) {
@@ -128,9 +119,9 @@ std::map<std::string, std::string> Utils::loadConfigs(const fs::path& scriptDir)
             }
         }
     }
-
-    // 2. Current directory
-    fs::path configFile = fs::current_path() / "config.props";
+    
+    // 2. Script directory (highest priority)
+    fs::path configFile = scriptDir / file;
     if (fs::exists(configFile)) {
         auto configPropsMap = Utils::readProps(configFile);
         for (const auto& [k, v] : configPropsMap) {
@@ -138,16 +129,6 @@ std::map<std::string, std::string> Utils::loadConfigs(const fs::path& scriptDir)
         }
     }
     
-    // 3. Script directory (highest priority)
-    configFile = scriptDir / "config.props";
-    if (fs::exists(configFile)) {
-        auto configPropsMap = Utils::readProps(configFile);
-        for (const auto& [k, v] : configPropsMap) {
-            configs[k] = v;
-        }
-    }
-    
-    return configs;
 }
 
 std::string Utils::exePath() {

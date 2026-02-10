@@ -32,7 +32,7 @@ public:
     /**
      * Load configurations from multiple locations and merge them into a single map
      */
-    static std::map<std::string, std::string> loadConfigs(const fs::path& scriptDir);
+    static void loadConfigs(const fs::path& scriptDir, std::map<std::string, std::string>& configs, const char* file);
     
     /**
      * Throw a runtime error with the given message

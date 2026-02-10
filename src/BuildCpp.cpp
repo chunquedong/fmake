@@ -467,7 +467,13 @@ void BuildCpp::applayDepends(bool checkError) {
 void BuildCpp::parse(const fs::path& scriptFile, bool checkError) {
     std::cout << "Input " << scriptFile.generic_string() << std::endl;
     scriptDir = scriptFile.parent_path();
-    auto propsMap = Utils::readProps(scriptFile);
+
+    std::map<std::string, std::string> propsMap;
+    Utils::loadConfigs(scriptDir, propsMap, "config.props");
+    auto propsMap_ = Utils::readProps(scriptFile);
+    for (const auto& [k, v] : propsMap_) {
+        propsMap[k] = v;
+    }
 
     // Parse general config
     osParse("", propsMap);
