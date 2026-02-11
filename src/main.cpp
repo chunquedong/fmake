@@ -22,7 +22,6 @@ void printHelp() {
     std::cout << "  -execute       Execute the built binary" << std::endl;
     std::cout << "  -version       Version information" << std::endl;
     std::cout << std::endl;
-    std::cout << "Default script file: fmake.props" << std::endl;
 }
 
 int main(int argc, char* argv[]) {
@@ -57,6 +56,7 @@ int main(int argc, char* argv[]) {
         }
         else if (arg == "-version") {
             printf("fmake 3.0\n");
+            return 0;
         }
         else {
             scriptPath = arg;

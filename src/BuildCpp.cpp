@@ -159,20 +159,18 @@ void BuildCpp::osParse(const std::string& os, const std::map<std::string, std::s
     }
 
     // Get srcDirs
-    std::string srcDirsStr;
     it = props.find(os + "srcDirs");
     if (it != props.end()) {
-        srcDirsStr = it->second;
+        std::string srcDirsStr = it->second;
+        std::vector<fs::path> parsedSrcDirs = parseDirs(&srcDirsStr, {});
+        srcDirs.insert(srcDirs.end(), parsedSrcDirs.begin(), parsedSrcDirs.end());
     }
-    std::vector<fs::path> parsedSrcDirs = parseDirs(&srcDirsStr, {});
-
+    
     // Get excludeSrc
     it = props.find(os + "excludeSrc");
     if (it != props.end()) {
         excludeSrc = it->second;
     }
-
-    srcDirs.insert(srcDirs.end(), parsedSrcDirs.begin(), parsedSrcDirs.end());
 
     // Get includeDir
     it = props.find(os + "incDir");
@@ -185,16 +183,15 @@ void BuildCpp::osParse(const std::string& os, const std::map<std::string, std::s
     }
 
     // Get incDirs
-    std::string incDirsStr;
     it = props.find(os + "incDirs");
     if (it != props.end()) {
-        incDirsStr = it->second;
-    }
-    std::vector<fs::path> parsedIncDirs = parseDirs(&incDirsStr, {});
-    for (const auto& incdir : parsedIncDirs) {
-        installHeaders.push_back(incdir);
-        if (fs::is_directory(incdir)) {
-            incDirs.push_back(incdir);
+        std::string incDirsStr = it->second;
+        std::vector<fs::path> parsedIncDirs = parseDirs(&incDirsStr, {});
+        for (const auto& incdir : parsedIncDirs) {
+            installHeaders.push_back(incdir);
+            if (fs::is_directory(incdir)) {
+                incDirs.push_back(incdir);
+            }
         }
     }
 
@@ -205,13 +202,12 @@ void BuildCpp::osParse(const std::string& os, const std::map<std::string, std::s
     }
 
     // Get resDirs
-    std::string resDirsStr;
     it = props.find(os + "resDirs");
     if (it != props.end()) {
-        resDirsStr = it->second;
+        std::string resDirsStr = it->second;
+        std::vector<fs::path> parsedResDirs = parseDirs(&resDirsStr, {});
+        resDirs.insert(resDirs.end(), parsedResDirs.begin(), parsedResDirs.end());
     }
-    std::vector<fs::path> parsedResDirs = parseDirs(&resDirsStr, {});
-    resDirs.insert(resDirs.end(), parsedResDirs.begin(), parsedResDirs.end());
 
     // Get outType
     it = props.find(os + "outType");
@@ -238,16 +234,15 @@ void BuildCpp::osParse(const std::string& os, const std::map<std::string, std::s
     }
 
     // Get debugExtLibs
-    std::string debugExtLibsStr;
     it = props.find(os + debug + ".extLibs");
     if (it != props.end()) {
-        debugExtLibsStr = it->second;
-    }
-    if (!debugExtLibsStr.empty()) {
-        std::vector<std::string> tokens = Utils::split(debugExtLibsStr, ',');
-        for (const auto& token : tokens) {
-            if (!token.empty()) {
-                libs.push_back(token);
+        std::string debugExtLibsStr = it->second;
+        if (!debugExtLibsStr.empty()) {
+            std::vector<std::string> tokens = Utils::split(debugExtLibsStr, ',');
+            for (const auto& token : tokens) {
+                if (!token.empty()) {
+                    libs.push_back(token);
+                }
             }
         }
     }
@@ -264,37 +259,34 @@ void BuildCpp::osParse(const std::string& os, const std::map<std::string, std::s
     }
 
     // Get debugDefines
-    std::string debugDefinesStr;
     it = props.find(os + debug + ".defines");
     if (it != props.end()) {
-        debugDefinesStr = it->second;
-    }
-    if (!debugDefinesStr.empty()) {
-        std::vector<std::string> tokens = Utils::split(debugDefinesStr, ',');
-        for (const auto& token : tokens) {
-            if (!token.empty()) {
-                defines.push_back(token);
+        std::string debugDefinesStr = it->second;
+        if (!debugDefinesStr.empty()) {
+            std::vector<std::string> tokens = Utils::split(debugDefinesStr, ',');
+            for (const auto& token : tokens) {
+                if (!token.empty()) {
+                    defines.push_back(token);
+                }
             }
         }
     }
 
     // Get extIncDirs
-    std::string extIncDirsStr;
     it = props.find(os + "extIncDirs");
     if (it != props.end()) {
-        extIncDirsStr = it->second;
+        std::string extIncDirsStr = it->second;
+        std::vector<fs::path> parsedExtIncDirs = parseDirs(&extIncDirsStr, {});
+        incDirs.insert(incDirs.end(), parsedExtIncDirs.begin(), parsedExtIncDirs.end());
     }
-    std::vector<fs::path> parsedExtIncDirs = parseDirs(&extIncDirsStr, {});
-    incDirs.insert(incDirs.end(), parsedExtIncDirs.begin(), parsedExtIncDirs.end());
 
     // Get extLibDirs
-    std::string extLibDirsStr;
     it = props.find(os + "extLibDirs");
     if (it != props.end()) {
-        extLibDirsStr = it->second;
+        std::string extLibDirsStr = it->second;
+        std::vector<fs::path> parsedExtLibDirs = parseDirs(&extLibDirsStr, {});
+        libDirs.insert(libDirs.end(), parsedExtLibDirs.begin(), parsedExtLibDirs.end());
     }
-    std::vector<fs::path> parsedExtLibDirs = parseDirs(&extLibDirsStr, {});
-    libDirs.insert(libDirs.end(), parsedExtLibDirs.begin(), parsedExtLibDirs.end());
 
     // Get outDir
     it = props.find(os + "outDir");
@@ -307,14 +299,17 @@ void BuildCpp::osParse(const std::string& os, const std::map<std::string, std::s
 }
 
 fs::path BuildCpp::getFmakeRepoDir() {
-    const char* devHome = std::getenv("FMAKE_REPO");
     std::string devHomeStr;
 
-    if (devHome) {
-        devHomeStr = devHome;
-        // Windows driver name
-        if (devHomeStr.size() > 1 && std::isalpha(devHomeStr[0]) && devHomeStr[1] == ':') {
-            devHomeStr = fs::canonical(devHomeStr).generic_string();
+    auto it = configs.find("fmakeRepo");
+    if (it != configs.end()) {
+        devHomeStr = it->second;
+    }
+
+    if (devHomeStr.empty()) {
+        const char* devHome = std::getenv("FMAKE_REPO");
+        if (devHome) {
+            devHomeStr = devHome;
         }
     }
 
@@ -336,7 +331,7 @@ fs::path BuildCpp::getFmakeRepoDir() {
         }
     }
 
-    fs::path path = devHomeStr;
+    fs::path path = fs::canonical(devHomeStr);
     if (!fs::exists(path)) {
         fs::create_directories(path);
     } else if (!fs::is_directory(path)) {
@@ -468,12 +463,9 @@ void BuildCpp::parse(const fs::path& scriptFile, bool checkError) {
     std::cout << "Input " << scriptFile.generic_string() << std::endl;
     scriptDir = scriptFile.parent_path();
 
-    std::map<std::string, std::string> propsMap;
-    Utils::loadConfigs(scriptDir, propsMap, "config.props");
-    auto propsMap_ = Utils::readProps(scriptFile);
-    for (const auto& [k, v] : propsMap_) {
-        propsMap[k] = v;
-    }
+    Utils::loadConfigs(scriptDir, configs, "config.props");
+
+    std::map<std::string, std::string> propsMap = Utils::readProps(scriptFile);
 
     // Parse general config
     osParse("", propsMap);
@@ -493,14 +485,23 @@ void BuildCpp::parse(const fs::path& scriptFile, bool checkError) {
         }
 
         if (compiler.empty()) {
-            #ifdef _WIN32
+            auto it = configs.find("compiler");
+            if (it != configs.end()) {
+                compiler = it->second;
+            }
+        }
+        if (compiler.empty()) {
+#ifdef _WIN32
             compiler = "msvc";
-            #else
+#else
             compiler = "gcc";
-            #endif
+#endif
         }
     }
 
+    if (os != "emcc") {
+        osParse("non-emcc.", propsMap);
+    }
     osParse(compiler + ".", propsMap);
     osParse(os + "-" + compiler + ".", propsMap);
 
@@ -522,7 +523,6 @@ void BuildCpp::parse(const fs::path& scriptFile, bool checkError) {
             // Invalid regex, ignore
         }
     }
-
     auto parsedSources = srcList(srcDirs, excludeRegex);
     sources.insert(sources.end(), parsedSources.begin(), parsedSources.end());
 

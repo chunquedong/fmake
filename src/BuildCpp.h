@@ -95,6 +95,8 @@ public:
     // Execute build result
     bool execute;
 
+    std::map<std::string, std::string> configs;
+
     // Constructor
     BuildCpp();
 
@@ -124,7 +126,7 @@ private:
     void osParse(const std::string& os, const std::map<std::string, std::string>& props);
 
     // Get fmake repo directory
-    static fs::path getFmakeRepoDir();
+    fs::path getFmakeRepoDir();
 
     // Get starts with
     void getStartsWith(const std::string& prefix, const std::map<std::string, std::string>& props, 

@@ -12,7 +12,9 @@
 CompileCpp::CompileCpp(const BuildCpp& buildInfo) : buildInfo(buildInfo), version(buildInfo.version) {
     compiler = buildInfo.compiler;
     Utils::loadConfigs(buildInfo.scriptDir, configs, "config_compiler.props");
-    Utils::loadConfigs(buildInfo.scriptDir, configs, "config.props");
+    for (auto it = buildInfo.configs.begin(); it != buildInfo.configs.end(); ++it) {
+        configs[it->first] = it->second;
+    }
     if (configs.size() == 0) {
         Utils::throwError("Load config.props file fail");
     }
@@ -572,18 +574,13 @@ void CompileCpp::copyInto(const std::vector<fs::path>& src, const fs::path& dir,
                 filename = f.parent_path().filename();
             }
             dst = dir / filename;
-            if (!fs::exists(dst)) {
-                fs::create_directories(dst);
-            }
         }
 
         if (fs::is_directory(f)) {
             for (const auto& entry : fs::recursive_directory_iterator(f)) {
                 fs::path relPath = fs::relative(entry.path(), f);
                 fs::path dstPath = dst / relPath;
-                if (fs::is_directory(entry)) {
-                    fs::create_directories(dstPath);
-                } else {
+                if (!fs::is_directory(entry)) {
                     std::string ext = entry.path().extension().generic_string();
                     if (!filter || ext == ".h" || ext == ".hpp" || ext == ".inl") {
                         fs::create_directories(dstPath.parent_path());
@@ -595,7 +592,7 @@ void CompileCpp::copyInto(const std::vector<fs::path>& src, const fs::path& dir,
             }
         } else {
             if (overwrite || !fs::exists(dst)) {
-                fs::create_directories(dst.parent_path());
+                fs::create_directories(dst);
                 fs::path dstPath = dst / f.filename();
                 std::string ext = f.extension().generic_string();
                 if (!filter || ext == ".h" || ext == ".hpp" || ext == ".inl") {
