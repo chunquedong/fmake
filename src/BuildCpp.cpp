@@ -75,6 +75,7 @@ std::vector<fs::path> BuildCpp::allDirs(const fs::path& scriptDir, const fs::pat
     fs::path fullPath = base / dir;
 
     if (fs::exists(fullPath) && fs::is_directory(fullPath)) {
+        subs.push_back(fullPath);
         for (const auto& entry : fs::recursive_directory_iterator(fullPath)) {
             if (fs::is_directory(entry)) {
                 subs.push_back(entry.path());
