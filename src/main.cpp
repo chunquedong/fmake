@@ -31,7 +31,7 @@ int main(int argc, char* argv[]) {
     bool debug = false;
     bool execute = false;
     std::string compiler;
-    std::string scriptPath = "fmake.props";
+    std::string scriptPath;
 
     // Parse command line arguments
     for (int i = 1; i < argc; ++i) {
@@ -61,6 +61,11 @@ int main(int argc, char* argv[]) {
         else {
             scriptPath = arg;
         }
+    }
+
+    if (scriptPath.size() == 0) {
+        printHelp();
+        return 1;
     }
 
     fs::path scriptFile = scriptPath;
