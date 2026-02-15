@@ -362,16 +362,21 @@ void BuildCpp::applayDepends(bool checkError) {
             if (!dep.match(rversion)) {
                 Utils::throwError("Cannot resolve depend: '" + dep.name + " " + rversion + "' != '" + dep.toStr() + "'");
             }
-
+            
             for (const auto& [k, v] : meta) {
                 if (k == "pod.includesRewrite") {
                     includesRewrite = (v == "true");
-                } else if (k == "pod.includes") {
+                }
+            }
+
+            for (const auto& [k, v] : meta) {
+                if (k == "pod.includes") {
                     std::vector<std::string> tokens = Utils::split(v, ',');
                     for (const auto& token : tokens) {
                         if (!token.empty()) {
                             fs::path includePath;
-                            if (token[0] == '/') {
+                            //windows: /C:/x
+                            if (token.size() > 3 && token[0] == '/' && token[2] == ':') {
                                 includePath = token.substr(1, token.size() - 1);
                             }
                             else {

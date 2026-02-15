@@ -75,12 +75,12 @@ std::map<std::string, std::string> Utils::readProps(const fs::path& file) {
 }
 
 std::string Utils::trim(const std::string& str) {
-    size_t start = str.find_first_not_of(" \t");
+    size_t start = str.find_first_not_of(" \t\r\n");
     if (start == std::string::npos) {
         return "";
     }
     
-    size_t end = str.find_last_not_of(" \t");
+    size_t end = str.find_last_not_of(" \t\r\n");
     return str.substr(start, end - start + 1);
 }
 
@@ -159,7 +159,7 @@ void Utils::setenv(const char* key, const char* value) {
 #ifdef _WIN32
     SetEnvironmentVariableA(key, value);
 #else
-    setenv(key, value, 1);
+    ::setenv(key, value, 1);
 #endif
 }
 
