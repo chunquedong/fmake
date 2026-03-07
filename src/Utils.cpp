@@ -29,14 +29,6 @@ std::map<std::string, std::string> Utils::readProps(const fs::path& file) {
             line = line.substr(0, end + 1);
         }
 
-        // Trim whitespace from the beginning
-        std::string trimmedLine = Utils::trim(line);
-        
-        // Skip empty lines and comment lines (starting with // or #)
-        if (trimmedLine.empty() || trimmedLine.substr(0, 2) == "//" || trimmedLine.substr(0, 1) == "#") {
-            continue;
-        }
-
         // Check if line ends with backslash
         if (!line.empty() && line.back() == '\\') {
             // Remove the backslash and continue reading
@@ -45,6 +37,14 @@ std::map<std::string, std::string> Utils::readProps(const fs::path& file) {
         } else {
             // Add the current line to the accumulated line
             currentLine += line;
+
+            // Trim whitespace from the beginning
+            std::string trimmedLine = Utils::trim(currentLine);
+            // Skip empty lines and comment lines (starting with // or #)
+            if (trimmedLine.empty() || trimmedLine.substr(0, 2) == "//" || trimmedLine.substr(0, 1) == "#") {
+                currentLine.clear();
+                continue;
+            }
             
             // Process the complete line
             size_t pos = currentLine.find('=');
