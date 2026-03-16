@@ -6,7 +6,7 @@ CXXFLAGS = -std=c++17 -Wall -Wextra -Wpedantic
 INCLUDES = -I.
 
 # Source files
-SRCS = main.cpp BuildCpp.cpp CompileCpp.cpp Generator.cpp Utils.cpp
+SRCS = src/main.cpp src/BuildCpp.cpp src/CompileCpp.cpp src/Generator.cpp src/Utils.cpp
 
 # Header files
 HDRS = src/BuildCpp.h src/CompileCpp.h src/Generator.h src/Utils.h
