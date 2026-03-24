@@ -11,7 +11,7 @@
 
 CompileCpp::CompileCpp(const BuildCpp& buildInfo) : buildInfo(buildInfo), version(buildInfo.version) {
     compiler = buildInfo.compiler;
-    Utils::loadConfigs(buildInfo.scriptDir, configs, "config_compiler.props");
+    Utils::loadConfigs(buildInfo.scriptDir, configs, "tool_chain.props");
     for (auto it = buildInfo.configs.begin(); it != buildInfo.configs.end(); ++it) {
         configs[it->first] = it->second;
     }
@@ -44,7 +44,7 @@ void CompileCpp::init() {
     for (size_t i = 0; i < buildInfo.depends.size(); ++i) {
         dependsStr += buildInfo.depends[i].toStr();
         if (i < buildInfo.depends.size() - 1) {
-            dependsStr += ";";
+            dependsStr += ",";
         }
     }
     meta["pod.depends"] = dependsStr;

@@ -5,7 +5,7 @@
 
 ### Features
 
-- 声明式的配置构建脚本
+- 声明式构建脚本，配置做什么而不是怎么做
 - 跨平台，支持gcc、msvc、emscripten等编译器
 - 生成 Visual Studio、 XCode 项目文件
 - 依赖管理库
@@ -75,9 +75,9 @@ debug模式编译:
   incDirs: 需要拷贝的头文件目录
   resDirs: 需要拷贝的资源文件目录
   depends: 依赖的库（只需要名称和版本号，不需要指定头文件和库文件）
-  extIncDirs: 额外的头文件搜索路径
-  extLibDirs: 额外的库文件搜索路径
-  extLibs: 额外依赖的库名称
+  extIncDirs: 额外的头文件搜索路径（不推荐使用）
+  extLibDirs: 额外的库文件搜索路径（不推荐使用）
+  extLibs: 额外依赖的库名称（不推荐使用）
   defines: 用户定义的宏
   extConfigs.cppflags: 编译器选项
   incDst: 头文件安装位置
@@ -111,6 +111,14 @@ msvc.define = ...
 可以用来重写config.props中的配置, 例如:
 ```
 emcc.home=C:/soft/emsdk/upstream/emscripten/
+```
+
+### 虚拟模块
+通过depends依赖的模块需要也是fmake构建的。如果是其他构建系统构建的模块，需要在bin/$name.vm文件中声明。例如Qt.vm:
+```
+incDirs = ...
+libDirs = ...
+libs = ...
 ```
 
 ### 包仓库

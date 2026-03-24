@@ -5,7 +5,7 @@ Declarative C++ build tool
 
 ### Features
 
-- Declarative make file script
+- Declarative build script, configuring what to do rather than how to do it.
 - Cross-platform and support gcc, msvc, emscripten
 - Generate Visual Studio and XCode project file
 - Dependency Package Management
@@ -76,9 +76,9 @@ require install cmake.
   incDirs: include directory to copy
   resDirs: resource files to copy
   depends: library with version
-  extIncDirs: extra include dirs
-  extLibDirs: extra library dirs
-  extLibs: extra depend library name
+  extIncDirs: extra include dirs (Not recommended)
+  extLibDirs: extra library dirs (Not recommended)
+  extLibs: extra depend library name (Not recommended)
   defines: user define macro
   extConfigs.cppflags: compiler flags
   incDst: header file directory name
@@ -112,6 +112,15 @@ Create the configuration file: bin/config.props
 You can rewrite config.props to customize configurations, for example:
 ```
 emcc.home=C:/soft/emsdk/upstream/emscripten/
+```
+
+### Virtual Module
+Modules that are depended on via depends must also be built with fmake.
+If a module is built with another build system, it needs to be declared in the bin/$name.vm file. For example, Qt.vm:
+```
+incDirs = ...
+libDirs = ...
+libs = ...
 ```
 
 ### Package Repository

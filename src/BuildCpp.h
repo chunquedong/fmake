@@ -103,13 +103,20 @@ public:
     // Parse build script
     void parse(const fs::path& scriptFile, bool checkError);
 
-    // Apply dependencies
-    void applayDepends(bool checkError);
-
     // Dump build info
     void dump() const;
 
 private:
+
+    void applayModule(bool checkError, const Depend& dep);
+    // Apply dependencies
+    void applayDepends(bool checkError);
+
+    void walkDepends(const Depend& dep, std::map<std::string, int>& dependMap, std::vector<Depend>& result);
+    void recursiveDepends();
+
+    std::string getVirtualModuleItem(std::map<std::string, std::string>& configs, const std::string& key);
+
     // Validate build info
     void validate() const;
 

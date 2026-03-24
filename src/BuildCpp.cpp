@@ -342,127 +342,245 @@ fs::path BuildCpp::getFmakeRepoDir() {
     return path;
 }
 
-void BuildCpp::applayDepends(bool checkError) {
+void BuildCpp::walkDepends(const Depend& dep, std::map<std::string, int>& dependMap, std::vector<Depend>& result) {
+    if (dependMap.find(dep.name) != dependMap.end()) {
+        return;
+    }
+    dependMap[dep.name] = 1;
+
     fs::path outHome = outDir;
+    fs::path metaPath = outHome / dep.name / "meta.props";
 
+    std::vector<std::string> ndeps;
+    if (fs::exists(metaPath)) {
+        auto meta = Utils::readProps(metaPath);
+        std::string depends;
+        for (const auto& [k, v] : meta) {
+            if (k == "pod.depends") {
+                depends = v;
+                break;
+            }
+        }
+        if (depends.size() > 0) {
+            depends = Utils::replaceAll(depends, ";", ",");
+            std::vector<std::string> tokens = Utils::split(depends, ',');
+            for (const auto& token : tokens) {
+                if (!token.empty()) {
+                    ndeps.push_back(token);
+                }
+            }
+        }
+    }
+
+    for (const auto& token : ndeps) {
+        Depend dp(token);
+        walkDepends(dp, dependMap, result);
+    }
+
+    result.push_back(dep);
+}
+
+void BuildCpp::recursiveDepends() {
+    std::map<std::string, int> dependMap;
+    std::vector<Depend> result;
     for (const auto& dep : depends) {
-        bool includesRewrite = false;
-        fs::path metaPath = outHome / dep.name / "meta.props";
+        walkDepends(dep, dependMap, result);
+    }
 
-        if (fs::exists(metaPath)) {
-            auto meta = Utils::readProps(metaPath);
-            std::string rversion;
-            for (const auto& [k, v] : meta) {
-                if (k == "pod.version") {
-                    rversion = v;
-                    break;
-                }
-            }
+    depends = result;
+}
 
-            if (!dep.match(rversion)) {
-                Utils::throwError("Cannot resolve depend: '" + dep.name + " " + rversion + "' != '" + dep.toStr() + "'");
-            }
-            
-            for (const auto& [k, v] : meta) {
-                if (k == "pod.includesRewrite") {
-                    includesRewrite = (v == "true");
-                }
-            }
+void BuildCpp::applayModule(bool checkError, const Depend& dep) {
+    fs::path outHome = outDir;
+    bool includesRewrite = false;
+    fs::path metaPath = outHome / dep.name / "meta.props";
 
-            for (const auto& [k, v] : meta) {
-                if (k == "pod.includes") {
-                    std::vector<std::string> tokens = Utils::split(v, ',');
-                    for (const auto& token : tokens) {
-                        if (!token.empty()) {
-                            fs::path includePath;
-                            //windows: /C:/x
-                            if (token.size() > 3 && token[0] == '/' && token[2] == ':') {
-                                includePath = token.substr(1, token.size() - 1);
-                            }
-                            else {
-                                includePath = token;
-                            }
-                            if (fs::exists(includePath)) {
-                                incDirs.push_back(includePath);
-                            } else {
-                                includesRewrite = false;
-                            }
-                        }
+    auto meta = Utils::readProps(metaPath);
+    std::string rversion = meta["pod.version"];
+
+    if (!dep.match(rversion)) {
+        Utils::throwError("Cannot resolve depend: '" + dep.name + " " + rversion + "' != '" + dep.toStr() + "'");
+    }
+    
+    for (const auto& [k, v] : meta) {
+        if (k == "pod.includesRewrite") {
+            includesRewrite = (v == "true");
+        }
+    }
+
+    for (const auto& [k, v] : meta) {
+        if (k == "pod.includes") {
+            std::vector<std::string> tokens = Utils::split(v, ',');
+            for (const auto& token : tokens) {
+                if (!token.empty()) {
+                    fs::path includePath;
+                    //windows: /C:/x
+                    if (token.size() > 3 && token[0] == '/' && token[2] == ':') {
+                        includePath = token.substr(1, token.size() - 1);
+                    }
+                    else {
+                        includePath = token;
+                    }
+                    if (fs::exists(includePath)) {
+                        incDirs.push_back(includePath);
+                    } else {
+                        includesRewrite = false;
                     }
                 }
             }
         }
+    }
+    
 
-        if (!includesRewrite) {
-            fs::path depIncPath = outHome / dep.name / "include/";
-            if (!fs::exists(depIncPath)) {
-                if (checkError) {
-                    Utils::throwError("Don't find the depend " + dep.toStr());
-                } else {
-                    std::cerr << "Don't find the depend " + dep.toStr() << std::endl;
-                }
-            }
-            incDirs.push_back(depIncPath);
-        }
-
-        fs::path depLibPath = outHome / dep.name / "lib/";
-        if (!fs::exists(depLibPath)) {
+    if (!includesRewrite) {
+        fs::path depIncPath = outHome / dep.name / "include/";
+        if (!fs::exists(depIncPath)) {
             if (checkError) {
                 Utils::throwError("Don't find the depend " + dep.toStr());
             } else {
                 std::cerr << "Don't find the depend " + dep.toStr() << std::endl;
             }
         }
-        libDirs.push_back(depLibPath);
+        incDirs.push_back(depIncPath);
     }
 
-    for (const auto& dep : depends) {
-        fs::path depLibPath = outHome / dep.name / "lib/";
-        int count = 0;
 
+    fs::path depLibPath = outHome / dep.name / "lib/";
+    if (!fs::exists(depLibPath)) {
+        if (checkError) {
+            Utils::throwError("Don't find the depend " + dep.toStr());
+        } else {
+            std::cerr << "Don't find the depend " + dep.toStr() << std::endl;
+        }
+        return;
+    }
+    libDirs.push_back(depLibPath);
+
+
+    //find .lib file
+    int count = 0;
+    for (const auto& entry : fs::directory_iterator(depLibPath)) {
+        if (fs::is_regular_file(entry)) {
+            std::string ext = entry.path().extension().generic_string();
+            if (ext == ".a" || ext == ".so") {
+                std::string libName = entry.path().filename().generic_string();
+                if (libName.substr(0, 3) == "lib" && libName.substr(libName.size() - 2) == ".a") {
+                    libs.push_back(libName.substr(3, libName.size() - 5));
+                } else if (libName.substr(0, 3) == "lib" && libName.substr(libName.size() - 3) == ".so") {
+                    libs.push_back(libName.substr(3, libName.size() - 6));
+                } else {
+                    libs.push_back(libName);
+                }
+                count++;
+            }
+        }
+    }
+
+
+    if (count == 0) {
         if (fs::exists(depLibPath)) {
             for (const auto& entry : fs::directory_iterator(depLibPath)) {
                 if (fs::is_regular_file(entry)) {
                     std::string ext = entry.path().extension().generic_string();
-                    if (ext == ".a" || ext == ".so") {
-                        std::string libName = entry.path().filename().generic_string();
-                        if (libName.substr(0, 3) == "lib" && libName.substr(libName.size() - 2) == ".a") {
-                            libs.push_back(libName.substr(3, libName.size() - 5));
-                        } else if (libName.substr(0, 3) == "lib" && libName.substr(libName.size() - 3) == ".so") {
-                            libs.push_back(libName.substr(3, libName.size() - 6));
-                        } else {
-                            libs.push_back(libName);
-                        }
+                    if (ext == ".lib") {
+                        libs.push_back(entry.path().filename().generic_string());
                         count++;
                     }
                 }
             }
         }
+    }
 
-        if (count == 0) {
-            if (fs::exists(depLibPath)) {
-                for (const auto& entry : fs::directory_iterator(depLibPath)) {
-                    if (fs::is_regular_file(entry)) {
-                        std::string ext = entry.path().extension().generic_string();
-                        if (ext == ".lib") {
-                            libs.push_back(entry.path().filename().generic_string());
-                            count++;
-                        }
-                    }
-                }
-            }
-        }
-
-        if (count == 0) {
-            if (checkError) {
-                Utils::throwError("Don't find any lib in " + depLibPath.generic_string());
-            } else {
-                std::cerr << "Don't find any lib in " + depLibPath.generic_string() << std::endl;
-            }
+    if (count == 0) {
+        if (checkError) {
+            Utils::throwError("Don't find any lib in " + depLibPath.generic_string());
+        } else {
+            std::cerr << "Don't find any lib in " + depLibPath.generic_string() << std::endl;
         }
     }
 }
 
+std::string BuildCpp::getVirtualModuleItem(std::map<std::string, std::string>& configs, const std::string& key) {
+    std::string os = Utils::osName();
+    std::string name = os + "-" + compiler + "." + key;
+    auto it = configs.find(name);
+    if (it != configs.end()) {
+        return it->second;
+    }
+
+    name = compiler + "." + key;
+    it = configs.find(name);
+    if (it != configs.end()) {
+        return it->second;
+    }
+
+    name = os + "." + key;
+    it = configs.find(name);
+    if (it != configs.end()) {
+        return it->second;
+    }
+
+    it = configs.find(key);
+    if (it != configs.end()) {
+        return it->second;
+    }
+    return "";
+}
+
+void BuildCpp::applayDepends(bool checkError) {
+    fs::path outHome = outDir;
+
+    for (const auto& dep : depends) {
+        fs::path metaPath = outHome / dep.name / "meta.props";
+
+        if (fs::exists(metaPath)) {
+            applayModule(checkError, dep);
+        }
+        else {
+            std::map<std::string, std::string> configs;
+            std::string name = dep.name + ".vm";
+            Utils::loadConfigs(scriptDir, configs, name.c_str());
+
+            if (configs.size() == 0) {
+                if (checkError) {
+                    Utils::throwError("Don't find the depend " + dep.toStr());
+                } else {
+                    std::cerr << "Don't find the depend " + dep.toStr() << std::endl;
+                }
+                continue;
+            }
+
+            std::string rversion = getVirtualModuleItem(configs, "version");
+            if (rversion.size() > 0 && !dep.match(rversion)) {
+                Utils::throwError("Cannot resolve depend: '" + dep.name + " " + rversion + "' != '" + dep.toStr() + "'");
+            }
+
+            std::vector<std::string> tokens = Utils::split(getVirtualModuleItem(configs, "incDirs"), ',');
+            for (const auto& token : tokens) {
+                std::string path = token;
+                //windows: /C:/x
+                if (token.size() > 3 && token[0] == '/' && token[2] == ':') {
+                    path = token.substr(1, token.size() - 1);
+                }
+                incDirs.push_back(path);
+            }
+            tokens = Utils::split(getVirtualModuleItem(configs, "libDirs"), ',');
+            for (const auto& token : tokens) {
+                std::string path = token;
+                //windows: /C:/x
+                if (token.size() > 3 && token[0] == '/' && token[2] == ':') {
+                    path = token.substr(1, token.size() - 1);
+                }
+                libDirs.push_back(path);
+            }
+            tokens = Utils::split(getVirtualModuleItem(configs, "libs"), ',');
+            for (const auto& token : tokens) {
+                libs.push_back(token);
+            }
+        }
+
+    }
+}
 
 
 void BuildCpp::parse(const fs::path& scriptFile, bool checkError) {
@@ -538,6 +656,8 @@ void BuildCpp::parse(const fs::path& scriptFile, bool checkError) {
         fs::create_directories(outDirFile);
         outDir = outDirFile;
     }
+
+    recursiveDepends();
 
     // Apply dependencies
     applayDepends(checkError);
