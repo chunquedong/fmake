@@ -19,6 +19,7 @@ void printHelp() {
     std::cout << "  -dump          Dump build information" << std::endl;
     std::cout << "  -d, -debug     Enable debug mode" << std::endl;
     std::cout << "  -c, -compiler  Specify compiler" << std::endl;
+    std::cout << "  -t, -target    Specify target name" << std::endl;
     std::cout << "  -execute       Execute the built binary" << std::endl;
     std::cout << "  -version       Version information" << std::endl;
     std::cout << std::endl;
@@ -32,6 +33,7 @@ int main(int argc, char* argv[]) {
     bool execute = false;
     std::string compiler;
     std::string scriptPath;
+    std::string targetName;
 
     // Parse command line arguments
     for (int i = 1; i < argc; ++i) {
@@ -51,11 +53,16 @@ int main(int argc, char* argv[]) {
             if (i + 1 < argc) {
                 compiler = argv[++i];
             }
-        } else if (arg == "-execute") {
+        } else if (arg == "-t" || arg == "-target") {
+            if (i + 1 < argc) {
+                targetName = argv[++i];
+            }
+        }
+        else if (arg == "-execute") {
             execute = true;
         }
         else if (arg == "-version") {
-            printf("fmake 3.0\n");
+            printf("fmake 3.1\n");
             return 0;
         }
         else {
@@ -75,35 +82,54 @@ int main(int argc, char* argv[]) {
     }
     scriptFile = fs::absolute(scriptFile);
 
-    BuildCpp build;
-    if (debug) {
-        build.debug = "debug";
-    }
-    if (execute) {
-        build.execute = execute;
-    }
-    if (!compiler.empty()) {
-        build.compiler = compiler;
-    }
+    std::cout << "Input " << scriptFile.generic_string() << std::endl;
+    std::vector<IniSection> sections = Utils::readIni(scriptFile);
 
-    try {
-        build.parse(scriptFile, !generate && !dump);
-
-        if (generate) {
-            Generator generator(build);
-            generator.run(force);
-        } else if (dump) {
-            build.dump();
-        } else {
-            CompileCpp cc(build);
-            if (force) {
-                cc.clean();
-            }
-            cc.run();
+    int count = 0;
+    for (IniSection& section : sections) {
+        if (!targetName.empty() && section.name != targetName) {
+            continue;
         }
-        return 0;
-    } catch (const std::exception& e) {
-        std::cerr << "Error: " << e.what() << std::endl;
+        if (section.name.size() > 0) {
+            std::cout << "Target " << section.name << std::endl;
+        }
+        count++;
+        
+        BuildCpp build;
+        if (debug) {
+            build.debug = "debug";
+        }
+        if (execute) {
+            build.execute = execute;
+        }
+        if (!compiler.empty()) {
+            build.compiler = compiler;
+        }
+
+        try {
+            build.parse(scriptFile, !generate && !dump, section);
+
+            if (generate) {
+                Generator generator(build);
+                generator.run(force);
+            } else if (dump) {
+                build.dump();
+            } else {
+                CompileCpp cc(build);
+                if (force) {
+                    cc.clean();
+                }
+                cc.run();
+            }
+        } catch (const std::exception& e) {
+            std::cerr << "Error: " << e.what() << std::endl;
+            return 1;
+        }
+    }
+
+    if (count == 0 && !targetName.empty()) {
+        std::cerr << "Error: Target not found: " << targetName << std::endl;
         return 1;
     }
+    return 0;
 }

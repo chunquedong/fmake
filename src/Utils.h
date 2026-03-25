@@ -7,6 +7,12 @@
 
 namespace fs = std::filesystem;
 
+    
+struct IniSection {
+    std::string name;
+    std::map<std::string, std::string> props;
+};
+
 class Utils {
 public:
     /**
@@ -40,6 +46,11 @@ public:
     static void throwError(const std::string& message);
 
     static const char* osName();
+
+    /**
+     * Read INI file and return a vector of sections, each containing a map of key-value pairs
+     */
+    static std::vector<IniSection> readIni(const fs::path& file);
 private:
     /**
      * Trim whitespace from string

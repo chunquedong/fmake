@@ -1,5 +1,4 @@
 #include "BuildCpp.h"
-#include "Utils.h"
 #include <fstream>
 #include <sstream>
 #include <iostream>
@@ -34,9 +33,6 @@ BuildCpp::BuildCpp() : version(std::string("1.0")), debug("release"), installGlo
 void BuildCpp::validate() const {
     if (name.empty()) {
         Utils::throwError("Must set name");
-    }
-    if (summary.empty()) {
-        Utils::throwError("Must set summary");
     }
 }
 
@@ -537,9 +533,16 @@ void BuildCpp::applayDepends(bool checkError) {
             applayModule(checkError, dep);
         }
         else {
+            fs::path exePath = Utils::exePath();
+            fs::path configFile = exePath.parent_path() / "virtual_modules.ini";
+
+            std::vector<IniSection> sections = Utils::readIni(configFile.string());
             std::map<std::string, std::string> configs;
-            std::string name = dep.name + ".vm";
-            Utils::loadConfigs(scriptDir, configs, name.c_str());
+            for (const auto& section : sections) {
+                if (section.name == dep.name) {
+                    configs = section.props;
+                }
+            }
 
             if (configs.size() == 0) {
                 if (checkError) {
@@ -583,13 +586,13 @@ void BuildCpp::applayDepends(bool checkError) {
 }
 
 
-void BuildCpp::parse(const fs::path& scriptFile, bool checkError) {
-    std::cout << "Input " << scriptFile.generic_string() << std::endl;
+void BuildCpp::parse(const fs::path& scriptFile, bool checkError, IniSection& section) {
     scriptDir = scriptFile.parent_path();
 
     Utils::loadConfigs(scriptDir, configs, "config.props");
 
-    std::map<std::string, std::string> propsMap = Utils::readProps(scriptFile);
+    std::map<std::string, std::string> propsMap = section.props;
+    name = section.name;
 
     // Parse general config
     osParse("", propsMap);

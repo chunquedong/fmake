@@ -63,6 +63,9 @@ std::map<std::string, std::string> Utils::readProps(const fs::path& file) {
                     }
                     props[key] = value;
                 }
+                else {
+                    Utils::throwError("Format Error: %s" + currentLine);
+                }
             }
             
             // Reset current line
@@ -180,6 +183,86 @@ const char* Utils::osName() {
     return "unix";
 #endif
     return "";
+}
+
+std::vector<IniSection> Utils::readIni(const fs::path& file) {
+    std::vector<IniSection> iniData;
+    std::ifstream ifs(file);
+
+    if (!ifs.is_open()) {
+        return iniData;
+    }
+
+    std::string line;
+    std::string currentLine;
+    IniSection currentSection;
+
+    while (std::getline(ifs, line)) {
+
+        // Check if line ends with backslash
+        if (!line.empty() && line.back() == '\\') {
+            // Remove the backslash and continue reading
+            currentLine += line.substr(0, line.size() - 1);
+            continue;
+        } else {
+            // Add the current line to the accumulated line
+            currentLine += line;
+
+            // Trim whitespace
+            std::string trimmedLine = Utils::trim(currentLine);
+            
+            // Skip empty lines and comment lines (starting with #)
+            if (trimmedLine.empty() || trimmedLine.substr(0, 1) == "#") {
+                currentLine.clear();
+                continue;
+            }
+            
+            // Check if this is a section header [section]
+            if (trimmedLine.front() == '[' && trimmedLine.back() == ']') {
+                // If current section is not empty, add it to the vector
+                if (!currentSection.name.empty() || !currentSection.props.empty()) {
+                    iniData.push_back(currentSection);
+                    currentSection = IniSection(); // Reset current section
+                }
+                // Extract section name
+                currentSection.name = trimmedLine.substr(1, trimmedLine.size() - 2);
+                currentSection.name = Utils::trim(currentSection.name);
+            } else {
+                // This is a key-value pair
+                size_t pos = currentLine.find('=');
+                if (pos != std::string::npos) {
+                    std::string key = currentLine.substr(0, pos);
+                    std::string value = currentLine.substr(pos + 1);
+                    
+                    // Trim whitespace
+                    key = Utils::trim(key);
+                    value = Utils::trim(value);
+                    
+                    if (!key.empty()) {
+                        // Check for duplicate keys in the current section
+                        if (currentSection.props.find(key) != currentSection.props.end()) {
+                            Utils::throwError("Duplicate key found in INI file section '" + currentSection.name + "': " + key);
+                        }
+                        currentSection.props[key] = value;
+                    }
+                    else {
+                        Utils::throwError("Format Error: %s" + currentLine);
+                    }
+                }
+            }
+            
+            // Reset current line
+            currentLine.clear();
+        }
+    }
+
+    // Add the last section if it's not empty
+    if (!currentSection.name.empty() || !currentSection.props.empty()) {
+        iniData.push_back(currentSection);
+    }
+
+    ifs.close();
+    return iniData;
 }
 
 void Utils::throwError(const std::string& message) {

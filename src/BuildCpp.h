@@ -5,6 +5,7 @@
 #include <filesystem>
 #include <regex>
 #include <map>
+#include "Utils.h"
 
 namespace fs = std::filesystem;
 
@@ -101,7 +102,7 @@ public:
     BuildCpp();
 
     // Parse build script
-    void parse(const fs::path& scriptFile, bool checkError);
+    void parse(const fs::path& scriptFile, bool checkError, IniSection& section);
 
     // Dump build info
     void dump() const;

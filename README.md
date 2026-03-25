@@ -33,7 +33,7 @@ source vsvars.sh
 
 build script 'fmake.props':
 ```
-  name = helloExe
+  [helloExe]
   summary = test exe
   version = 1.0.1
   outType = exe
@@ -67,7 +67,7 @@ require install cmake.
 #### Build script detail
 
 ```
-  name: name of lib
+  name: name of lib (Not recommended)
   summary: discription
   version: build version
   outType: exe, lib, dll
@@ -116,11 +116,12 @@ emcc.home=C:/soft/emsdk/upstream/emscripten/
 
 ### Virtual Module
 Modules that are depended on via depends must also be built with fmake.
-If a module is built with another build system, it needs to be declared in the bin/$name.vm file. For example, Qt.vm:
+If a module is built with another build system, it needs to be declared in the bin/virtual_modules.ini file. For example:
 ```
-incDirs = ...
-libDirs = ...
-libs = ...
+[Qt]
+incDirs = D:/Qt/6.8.0/mingw_64/include/,D:/Qt/6.8.0/mingw_64/include/QtWidgets/,D:/Qt/6.8.0/mingw_64/include/QtGui/,D:/Qt/6.8.0/mingw_64/include/QtCore/
+libDirs = D:/Qt/6.8.0/mingw_64/lib/
+libs = Qt6Widgets,Qt6Gui,Qt6Core
 ```
 
 ### Package Repository

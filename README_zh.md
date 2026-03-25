@@ -32,7 +32,7 @@ source vsvars.sh
 
 构建脚本 'fmake.props':
 ```
-  name = helloExe
+  [helloExe]
   summary = test exe
   version = 1.0.1
   outType = exe
@@ -66,7 +66,7 @@ debug模式编译:
 #### 构建脚本细节
 
 ```
-  name: 库名称
+  name: 库名称（不推荐使用）
   summary: 描述
   version: 构建版本
   outType: exe, lib, dll
@@ -114,11 +114,12 @@ emcc.home=C:/soft/emsdk/upstream/emscripten/
 ```
 
 ### 虚拟模块
-通过depends依赖的模块需要也是fmake构建的。如果是其他构建系统构建的模块，需要在bin/$name.vm文件中声明。例如Qt.vm:
+通过depends依赖的模块需要也是fmake构建的。如果是其他构建系统构建的模块，需要在bin/virtual_modules.ini文件中声明。例如:
 ```
-incDirs = ...
-libDirs = ...
-libs = ...
+[Qt]
+incDirs = D:/Qt/6.8.0/mingw_64/include/,D:/Qt/6.8.0/mingw_64/include/QtWidgets/,D:/Qt/6.8.0/mingw_64/include/QtGui/,D:/Qt/6.8.0/mingw_64/include/QtCore/
+libDirs = D:/Qt/6.8.0/mingw_64/lib/
+libs = Qt6Widgets,Qt6Gui,Qt6Core
 ```
 
 ### 包仓库
