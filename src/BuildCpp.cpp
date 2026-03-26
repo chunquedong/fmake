@@ -285,10 +285,25 @@ void BuildCpp::osParse(const std::string& os, const std::map<std::string, std::s
         libDirs.insert(libDirs.end(), parsedExtLibDirs.begin(), parsedExtLibDirs.end());
     }
 
-    // Get outDir
-    it = props.find(os + "outDir");
+    // Get outBin
+    it = props.find(os + "outBinFile");
     if (it != props.end()) {
-        outDir = fs::canonical(it->second);
+        fs::path file = scriptDir / (it->second);
+        outBinFile = fs::absolute(file);
+    }
+
+    // Get flags
+    it = props.find(os + "cppflags");
+    if (it != props.end()) {
+        extConfigs["cppflags"] = (it->second);
+    }
+    it = props.find(os + "cflags");
+    if (it != props.end()) {
+        extConfigs["cflags"] = (it->second);
+    }
+    it = props.find(os + "linkflags");
+    if (it != props.end()) {
+        extConfigs["linkflags"] = (it->second);
     }
 
     // Get extConfigs
@@ -344,7 +359,7 @@ void BuildCpp::walkDepends(const Depend& dep, std::map<std::string, int>& depend
     }
     dependMap[dep.name] = 1;
 
-    fs::path outHome = outDir;
+    //fs::path outHome = outDir;
     fs::path metaPath = outHome / dep.name / "meta.props";
 
     std::vector<std::string> ndeps;
@@ -387,7 +402,7 @@ void BuildCpp::recursiveDepends() {
 }
 
 void BuildCpp::applayModule(bool checkError, const Depend& dep) {
-    fs::path outHome = outDir;
+    //fs::path outHome = outDir;
     bool includesRewrite = false;
     fs::path metaPath = outHome / dep.name / "meta.props";
 
@@ -524,7 +539,7 @@ std::string BuildCpp::getVirtualModuleItem(std::map<std::string, std::string>& c
 }
 
 void BuildCpp::applayDepends(bool checkError) {
-    fs::path outHome = outDir;
+    //fs::path outHome = outDir;
 
     for (const auto& dep : depends) {
         fs::path metaPath = outHome / dep.name / "meta.props";
@@ -654,10 +669,10 @@ void BuildCpp::parse(const fs::path& scriptFile, bool checkError, IniSection& se
     sources.insert(sources.end(), parsedSources.begin(), parsedSources.end());
 
     // Set default outDir
-    if (outDir.empty()) {
+    if (outHome.empty()) {
         fs::path outDirFile = getFmakeRepoDir() / compiler / debug;
         fs::create_directories(outDirFile);
-        outDir = outDirFile;
+        outHome = outDirFile;
     }
 
     recursiveDepends();
@@ -675,7 +690,8 @@ void BuildCpp::parse(const fs::path& scriptFile, bool checkError, IniSection& se
 void BuildCpp::dump() const {
     std::cout << "name: " << name << std::endl;
     std::cout << "summary: " << summary << std::endl;
-    std::cout << "outDir: " << outDir.generic_string() << std::endl;
+    std::cout << "outHome: " << outHome.generic_string() << std::endl;
+    std::cout << "outBinFile: " << outBinFile.generic_string() << std::endl;
     std::cout << "outType: " << static_cast<int>(outType) << std::endl;
     std::cout << "debug: " << debug << std::endl;
     std::cout << "version: " << version << std::endl;

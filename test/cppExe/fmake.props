@@ -7,5 +7,4 @@ srcDirs = cpp/
 incDirs = cpp/
 depends = helloLib 1.0.0
 defines = MY_DEBUG=1
-#gcc.extConfigs.cppflags = -std=c++11
-#msvc.extConfigs.cppflags = /std:c++14
+

@@ -17,9 +17,6 @@ private:
     // Output file pod dir
     fs::path outPodDir;
 
-    // Output file dir
-    fs::path outBinDir;
-
     // Object file directory
     fs::path objDir;
 

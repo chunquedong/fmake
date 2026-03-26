@@ -19,7 +19,7 @@ CompileCpp::CompileCpp(const BuildCpp& buildInfo) : buildInfo(buildInfo), versio
         Utils::throwError("Load config.props file fail");
     }
     compHome = config(compiler + ".home", "");
-    outPodDir = buildInfo.outDir / buildInfo.name;
+    outPodDir = buildInfo.outHome / buildInfo.name;
     objDir = buildInfo.scriptDir / ("../build/obj-" + buildInfo.name + "-" + compiler + "-" + buildInfo.debug);
     fs::create_directories(objDir);
 }
@@ -29,10 +29,16 @@ void CompileCpp::init() {
     fs::create_directories(outPodDir);
 
     fs::path dir = (buildInfo.outType == TargetType::exe) ? "bin/" : "lib/";
-    outBinDir = outPodDir / dir;
+    fs::path outBinDir = outPodDir / dir;
     fs::create_directories(outBinDir);
 
     outFile = outBinDir / buildInfo.name;
+    if (buildInfo.outType == TargetType::exe && !buildInfo.outBinFile.empty()) {
+        outFile = buildInfo.outBinFile;
+        if (!fs::exists(outFile.parent_path())) {
+            fs::create_directories(outFile.parent_path());
+        }
+    }
     fs::path outLibFile = outBinDir / ("lib" + buildInfo.name);
 
     // Initialize meta data
@@ -131,6 +137,20 @@ void CompileCpp::init() {
     fs::path oldFile = outBinDir / ("lib" + buildInfo.name + ".a");
     if (fs::exists(oldFile)) {
         fs::remove(oldFile);
+    }
+
+    // Set environment variables
+    std::string inc = config(compiler + ".env.incDirs", "");
+    std::string lib = config(compiler + ".env.libDirs", "");
+    if (!inc.empty()) {
+        // Set INCLUDE environment variable
+        std::string includeEnv = inc;
+        Utils::setenv("INCLUDE", includeEnv.c_str());
+    }
+    if (!lib.empty()) {
+        // Set LIB environment variable
+        std::string libEnv = lib;
+        Utils::setenv("LIB", libEnv.c_str());
     }
 }
 
@@ -236,16 +256,6 @@ std::string CompileCpp::fileToStr(const fs::path& f) {
 }
 
 std::string CompileCpp::config(const std::string& name, const std::string& def) const {
-    // Check environment variable
-    std::string envName = "FAN_BUILD_";
-    for (char c : name) {
-        envName += (char)std::toupper(c);
-    }
-    const char* envValue = std::getenv(envName.c_str());
-    if (envValue) {
-        return envValue;
-    }
-
     // Check configs
     auto it = configs.find(name);
     if (it != configs.end()) {
@@ -263,6 +273,9 @@ void CompileCpp::clean() {
     }
     if (fs::exists(objDir)) {
         fs::remove_all(objDir);
+    }
+    if (fs::exists(outFile)) {
+        fs::remove(outFile);
     }
 }
 
@@ -418,22 +431,6 @@ void CompileCpp::exeCmd(const std::string& name) {
         }
     }
 
-    // Set environment variables
-    std::string inc = config(compiler + ".include_dir", "");
-    std::string lib = config(compiler + ".lib_dir", "");
-    
-    if (!inc.empty()) {
-        // Set INCLUDE environment variable
-        std::string includeEnv = inc;
-        Utils::setenv("INCLUDE", includeEnv.c_str());
-    }
-    
-    if (!lib.empty()) {
-        // Set LIB environment variable
-        std::string libEnv = lib;
-        Utils::setenv("LIB", libEnv.c_str());
-    }
-
     std::cout << "Exec " << cmdStr << std::endl;
 
     // Execute command
@@ -524,9 +521,9 @@ void CompileCpp::install() {
         copyHeaderFile(outPodDir);
 
         if (buildInfo.installGlobal) {
-            copyHeaderFile(buildInfo.outDir);
+            copyHeaderFile(buildInfo.outHome);
 
-            fs::path libDirs = buildInfo.outDir / "lib/";
+            fs::path libDirs = buildInfo.outHome / "lib/";
             fs::create_directories(libDirs);
 
             fs::path srcLibDir = outPodDir / "lib/";

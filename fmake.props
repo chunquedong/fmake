@@ -4,3 +4,5 @@ outType = exe
 version = 3.0
 srcDirs = src/
 incDir = src/
+gcc.cppflags = -std=c++17
+msvc.cppflags = /std:c++17

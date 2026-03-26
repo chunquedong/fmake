@@ -62,7 +62,7 @@ int main(int argc, char* argv[]) {
             execute = true;
         }
         else if (arg == "-version") {
-            printf("fmake 3.1\n");
+            printf("fmake 4.0\n");
             return 0;
         }
         else {

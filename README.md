@@ -18,6 +18,10 @@ Build from source:
 ```
   sh build.sh
 ```
+or:
+```
+make
+```
 
 Add bin/ to your PATH.
 
@@ -25,9 +29,23 @@ Add bin/ to your PATH.
 ```
 source vsvars.sh
 ```
+Or create the configuration file: bin/config.props：
+```
+msvc.home=C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/
+msvc.env.incDirs=C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/include/;\
+C:/Program Files (x86)/Windows Kits/10/Include/10.0.26100.0/ucrt/;\
+C:/Program Files (x86)/Windows Kits/10/Include/10.0.26100.0/winrt/;\
+C:/Program Files (x86)/Windows Kits/10/Include/10.0.26100.0/cppwinrt/winrt/;\
+C:/Program Files (x86)/Windows Kits/10/Include/10.0.26100.0/shared/;\
+C:/Program Files (x86)/Windows Kits/10/Include/10.0.26100.0/um/
+
+msvc.env.libDirs=C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/lib/x64/;\
+C:/Program Files (x86)/Windows Kits/10/Lib/10.0.26100.0/ucrt/x64/;\
+C:/Program Files (x86)/Windows Kits/10/Lib/10.0.26100.0/um/x64/
+```
 [See also](https://learn.microsoft.com/en-us/cpp/build/building-on-the-command-line?view=msvc-170)
 
-### Usage
+## Usage
 
 #### Compile
 
@@ -80,9 +98,9 @@ require install cmake.
   extLibDirs: extra library dirs (Not recommended)
   extLibs: extra depend library name (Not recommended)
   defines: user define macro
-  extConfigs.cppflags: compiler flags
+  linkflags: link flags
+  cppflags: compiler flags
   incDst: header file directory name
-  extConfigs.linkflags: link flags
   debug.defines
   debug.extLibs
 ```
@@ -128,7 +146,6 @@ libs = Qt6Widgets,Qt6Gui,Qt6Core
 
 ```
 fmakeRepo
-   |_msvc
       |_emcc
       |_msvc
       |_gcc

@@ -110,7 +110,14 @@ std::string Generator::toPath(const fs::path& uri, bool keepPath, const std::str
 
 void Generator::genQmake(std::ofstream& out) {
     out << "#QT -= core gui" << std::endl;
-    out << "TARGET = " << buildInfo.name << std::endl;
+
+    std::string targetName = buildInfo.name;
+    if (buildInfo.outType == TargetType::exe) {
+        if (!buildInfo.outBinFile.empty()) {
+            targetName = buildInfo.outBinFile.filename().string();
+        }
+    }
+    out << "TARGET = " << targetName << std::endl;
 
     if (buildInfo.outType == TargetType::exe) {
         out << "TEMPLATE = app" << std::endl;
@@ -124,7 +131,7 @@ void Generator::genQmake(std::ofstream& out) {
     out << "!isEmpty($$(FMAKE_REPO)) {" << std::endl;
     out << "  FMAKE_REPO_LIB = $$(FMAKE_REPO)/" << buildInfo.compiler << "/" << buildInfo.debug << std::endl;
     out << "} else {" << std::endl;
-    std::string defaultRepoLib = buildInfo.outDir.generic_string();
+    std::string defaultRepoLib = buildInfo.outHome.generic_string();
     // Always use forward slashes for cross-platform compatibility
     defaultRepoLib = Utils::replaceAll(defaultRepoLib, "\\", "/");
     out << "  FMAKE_REPO_LIB = \"" << defaultRepoLib << "\"" << std::endl;
@@ -199,10 +206,15 @@ void Generator::genQmake(std::ofstream& out) {
     }
 
     // Set output directory
-    fs::path outPodDir = buildInfo.outDir / buildInfo.name;
+    fs::path outPodDir = buildInfo.outHome / buildInfo.name;
     std::string libOut;
     if (buildInfo.outType == TargetType::exe) {
-        libOut = toPath(outPodDir / "bin/");
+        if (!buildInfo.outBinFile.empty()) {
+            libOut = buildInfo.outBinFile.parent_path().generic_string();
+        }
+        else {
+            libOut = toPath(outPodDir / "bin/");
+        }
     } else {
         libOut = toPath(outPodDir / "lib/");
     }
@@ -251,7 +263,7 @@ void Generator::genCmake(std::ofstream& out) {
     out << "if(DEFINED ENV{FMAKE_REPO})" << std::endl;
     out << "  set(FMAKE_REPO_LIB \"$ENV{FMAKE_REPO}/" << buildInfo.compiler << "/" << buildInfo.debug << "\")" << std::endl;
     out << "else()" << std::endl;
-    std::string defaultRepoLib = buildInfo.outDir.generic_string();
+    std::string defaultRepoLib = buildInfo.outHome.generic_string();
     // Always use forward slashes for cross-platform compatibility
     defaultRepoLib = Utils::replaceAll(defaultRepoLib, "\\", "/");
     out << "  set(FMAKE_REPO_LIB \"" << defaultRepoLib << "\")" << std::endl;
@@ -351,15 +363,22 @@ void Generator::genCmake(std::ofstream& out) {
     out << std::endl;
 
     // Set output directories
-    fs::path outPodDir = buildInfo.outDir / buildInfo.name;
+    fs::path outPodDir = buildInfo.outHome / buildInfo.name;
     std::string libOut;
+    std::string targetName = buildInfo.name;
     if (buildInfo.outType == TargetType::exe) {
-        libOut = toPath(outPodDir / "bin/");
+        if (!buildInfo.outBinFile.empty()) {
+            libOut = buildInfo.outBinFile.parent_path().generic_string();
+            targetName = buildInfo.outBinFile.filename().string();
+        }
+        else {
+            libOut = toPath(outPodDir / "bin/");
+        }
     } else {
         libOut = toPath(outPodDir / "lib/");
     }
 
-    out << "set_target_properties (" << buildInfo.name << " PROPERTIES " << std::endl;
+    out << "set_target_properties (" << targetName << " PROPERTIES " << std::endl;
     out << "  ARCHIVE_OUTPUT_DIRECTORY " << libOut << std::endl;
     out << "  LIBRARY_OUTPUT_DIRECTORY " << libOut << std::endl;
     out << "  RUNTIME_OUTPUT_DIRECTORY " << libOut << std::endl;

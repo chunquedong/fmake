@@ -11,22 +11,39 @@
 - 依赖管理库
 
 
-### Install
+### 安装
 
 从源码构建:
 ```
   sh build.sh
 ```
-
+或者:
+```
+make
+```
 添加bin/目录到你的环境变量PATH
 
 ### 从shell使用微软C++工具集:
 ```
 source vsvars.sh
 ```
+或者在bin/config.props内配置：
+```
+msvc.home=C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/
+msvc.env.incDirs=C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/include/;\
+C:/Program Files (x86)/Windows Kits/10/Include/10.0.26100.0/ucrt/;\
+C:/Program Files (x86)/Windows Kits/10/Include/10.0.26100.0/winrt/;\
+C:/Program Files (x86)/Windows Kits/10/Include/10.0.26100.0/cppwinrt/winrt/;\
+C:/Program Files (x86)/Windows Kits/10/Include/10.0.26100.0/shared/;\
+C:/Program Files (x86)/Windows Kits/10/Include/10.0.26100.0/um/
+
+msvc.env.libDirs=C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/lib/x64/;\
+C:/Program Files (x86)/Windows Kits/10/Lib/10.0.26100.0/ucrt/x64/;\
+C:/Program Files (x86)/Windows Kits/10/Lib/10.0.26100.0/um/x64/
+```
 [详细信息参见这里](https://learn.microsoft.com/en-us/cpp/build/building-on-the-command-line?view=msvc-170)
 
-### 用法
+## 用法
 
 #### 编译
 
@@ -79,9 +96,9 @@ debug模式编译:
   extLibDirs: 额外的库文件搜索路径（不推荐使用）
   extLibs: 额外依赖的库名称（不推荐使用）
   defines: 用户定义的宏
-  extConfigs.cppflags: 编译器选项
+  cppflags: 编译器选项
+  linkflags: 连接器选项
   incDst: 头文件安装位置
-  extConfigs.linkflags: 连接器选项
   debug.defines： debug模式的定义
   debug.extLibs： debug模式的额外库名称
 ```
@@ -129,7 +146,6 @@ libs = Qt6Widgets,Qt6Gui,Qt6Core
 目录结构
 ```
 fmakeRepo
-   |_msvc
       |_emcc
       |_msvc
       |_gcc

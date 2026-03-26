@@ -37,7 +37,9 @@ public:
     std::string summary;
 
     // Output file dir
-    fs::path outDir;
+    fs::path outHome;
+
+    fs::path outBinFile;
 
     // Lib depends
     std::vector<Depend> depends;
