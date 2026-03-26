@@ -76,13 +76,30 @@ special compiler:
   fmake fmake.props -c gcc
 ```
 
-#### Generate project files
+### Source Code Path
+In fmake, srcDirs can be used to configure source code folders or individual files. When source code files are configured, all source files in the current folder are automatically searched.
+
+We standardize on using '/' for paths, Even on Windows. folders should end with '/'. For example:
+```
+srcDirs = cpp/
+```
+To recursively search subfolders, add '*' to indicate:
+```
+srcDirs = cpp/*
+```
+You can use excludeSrc to filter source files with a regular expression during the search:
+```
+srcDirs = cpp/
+excludeSrc = .*(cocoa|posix_).*
+```
+
+### Generate project files
 require install cmake.
 ```
   fmake -G -debug fmake.props
 ```
 
-#### Build script detail
+### Build script detail
 
 ```
   name: name of lib (Not recommended)
@@ -105,7 +122,7 @@ require install cmake.
   debug.extLibs
 ```
 
-#### Compiler and Platform-dependent configuration
+### Compiler and Platform-dependent configuration
 Prefix OS name
 - win32
 - macosx

@@ -45,7 +45,7 @@ C:/Program Files (x86)/Windows Kits/10/Lib/10.0.26100.0/um/x64/
 
 ## 用法
 
-#### 编译
+### 编译
 
 构建脚本 'fmake.props':
 ```
@@ -74,13 +74,31 @@ debug模式编译:
   fmake fmake.props -c gcc
 ```
 
-#### 生成IDE项目文件
+### 源码路径
+在fmake中srcDirs可以配置源码文件夹，或者当个文件。当配置源码文件后，会自动搜索当前文件夹下的所有源码文件。
+我们约定路径使用'/'，即便在Windows上。文件夹使用'/'结尾。例如:
+```
+srcDirs = cpp/
+```
+
+如果像递归搜索子文件夹，需要加'*'来表示:
+```
+srcDirs = cpp/*
+```
+
+可以通过excludeSrc在搜索源码文件时用正则表达式过滤:
+```
+srcDirs = cpp/
+excludeSrc = .*(cocoa|posix_).*
+```
+
+### 生成IDE项目文件
 需要安装cmake.
 ```
   fmake -G -debug fmake.props
 ```
 
-#### 构建脚本细节
+### 构建脚本细节
 
 ```
   name: 库名称（不推荐使用）
@@ -103,7 +121,7 @@ debug模式编译:
   debug.extLibs： debug模式的额外库名称
 ```
 
-#### 编译器和平台相关配置
+### 编译器和平台相关配置
 可以前缀操作系统名称
 - win32
 - macosx
