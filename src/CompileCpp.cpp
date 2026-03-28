@@ -185,64 +185,55 @@ fs::path CompileCpp::getObjFile(const fs::path& srcFile) const {
 void CompileCpp::run() {
     std::cout << "Compile module: " << buildInfo.name << " compiler: " << compiler << std::endl;
 
-    try {
-        init();
-    } catch (const std::exception& e) {
-        std::cerr << "CompileCpp init failed: " << e.what() << std::endl;
-        return;
-    }
+    init();
 
-    try {
-        for (const auto& srcFile : buildInfo.sources) {
-            // Set srcFile in configs
-            configs["srcFile"] = fileToStr(srcFile);
+    for (const auto& srcFile : buildInfo.sources) {
+        // Set srcFile in configs
+        configs["srcFile"] = fileToStr(srcFile);
 
-            fs::path objFile = getObjFile(srcFile);
-            if (fs::exists(objFile) && fs::is_regular_file(objFile)) {
-                auto objTime = fs::last_write_time(objFile);
-                // Subtract 1 second
-                auto srcTime = fs::last_write_time(srcFile);
-                if (!isDirty(srcFile, objTime)) {
-                    continue;
-                }
+        fs::path objFile = getObjFile(srcFile);
+        if (fs::exists(objFile) && fs::is_regular_file(objFile)) {
+            auto objTime = fs::last_write_time(objFile);
+            // Subtract 1 second
+            auto srcTime = fs::last_write_time(srcFile);
+            if (!isDirty(srcFile, objTime)) {
+                continue;
             }
-
-            // Create directory if not exists
-            fs::create_directories(objFile.parent_path());
-
-            // Set objFile in configs
-            configs["objFile"] = fileToStr(objFile);
-
-            // Select macros based on file type
-            if (srcFile.extension() == ".c") {
-                selectMacros("c");
-            } else {
-                selectMacros("cpp");
-            }
-
-            exeCmd("comp");
         }
 
-        // Link
-        if (buildInfo.outType == TargetType::lib) {
-            exeCmd("lib");
+        // Create directory if not exists
+        fs::create_directories(objFile.parent_path());
+
+        // Set objFile in configs
+        configs["objFile"] = fileToStr(objFile);
+
+        // Select macros based on file type
+        if (srcFile.extension() == ".c") {
+            selectMacros("c");
         } else {
-            exeCmd(buildInfo.outType == TargetType::dll ? "dll" : "exe");
+            selectMacros("cpp");
         }
 
-        // Install
-        install();
-
-        std::cout << "BUILD SUCCESS" << std::endl;
-
-        // Execute if needed
-        if (buildInfo.execute && buildInfo.outType == TargetType::exe) {
-            exeBin();
-        }
-    } catch (const std::exception& e) {
-        std::cerr << "Error: " << e.what() << std::endl;
-        std::cout << "BUILD FAIL" << std::endl;
+        exeCmd("comp");
     }
+
+    // Link
+    if (buildInfo.outType == TargetType::lib) {
+        exeCmd("lib");
+    } else {
+        exeCmd(buildInfo.outType == TargetType::dll ? "dll" : "exe");
+    }
+
+    // Install
+    install();
+
+    std::cout << "BUILD SUCCESS" << std::endl;
+
+    // Execute if needed
+    if (buildInfo.execute && buildInfo.outType == TargetType::exe) {
+        exeBin();
+    }
+
 }
 
 std::string CompileCpp::fileToStr(const fs::path& f) {

@@ -658,12 +658,8 @@ void BuildCpp::parse(const fs::path& scriptFile, bool checkError, IniSection& se
     std::regex* excludeRegex = nullptr;
     std::regex excludeRegexObj;
     if (!excludeSrc.empty()) {
-        try {
-            excludeRegexObj = std::regex(excludeSrc);
-            excludeRegex = &excludeRegexObj;
-        } catch (...) {
-            // Invalid regex, ignore
-        }
+        excludeRegexObj = std::regex(excludeSrc);
+        excludeRegex = &excludeRegexObj;
     }
     auto parsedSources = srcList(srcDirs, excludeRegex);
     sources.insert(sources.end(), parsedSources.begin(), parsedSources.end());
