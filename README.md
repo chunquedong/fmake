@@ -1,20 +1,23 @@
 
-## Overview
+## Fmake
+
+[中文](README_zh.md)
 
 Declarative C++ build tool
 
-### Features
+## Features
 
 - Declarative build script, configuring what to do rather than how to do it.
 - Cross-platform and support gcc, msvc, emscripten
 - Generate Visual Studio and XCode project file
-- Dependency Package Management
+- Built-in support for a dependency package management system
+- Incremental compilation — only compile modified files
 
 
-### Install
+## Install
 
 
-Build from source:
+Build from source(Run using Git Bash on the Windows platform):
 ```
   sh build.sh
 ```
@@ -25,7 +28,8 @@ make
 
 Add bin/ to your PATH.
 
-### Use the Microsoft C++ toolset from the shell:
+### Use the Microsoft C++ toolset from the shell
+Every time you start Git Bash, you need to run:
 ```
 source vsvars.sh
 ```
@@ -63,7 +67,7 @@ compile:
 ```
   fmake fmake.props
 ```
-debug compile:
+Compile in debug mode:
 ```
   fmake -d fmake.props
 ```
@@ -71,7 +75,7 @@ clean and compile:
 ```
   fmake -f fmake.props
 ```
-special compiler:
+Specify the compiler:
 ```
   fmake fmake.props -c gcc
 ```
@@ -94,12 +98,12 @@ excludeSrc = .*(cocoa|posix_).*
 ```
 
 ### Generate project files
-require install cmake.
+cmake needs to be installed.
 ```
   fmake -G -debug fmake.props
 ```
 
-### Build script detail
+### Build script details
 
 ```
   name: name of lib (Not recommended)
@@ -123,19 +127,20 @@ require install cmake.
 ```
 
 ### Compiler and Platform-dependent configuration
-Prefix OS name
+You can prefix with the operating system name:
 - win32
 - macosx
 - linux
 - non-win
 
+For example:
 ```
 win32.extIncDirs = ...
 linux.define = ...
 win32-gcc.extLibs = ...
 ```
 
-Compiler name
+You can also prefix with the compiler name:
 ```
 gcc.define = ...
 msvc.define = ...
@@ -181,4 +186,10 @@ fmakeRepo
 
 ### Do More Task
 
-Please write shell script.
+fmake does not provide functions other than building, and cannot handle business logic. It needs to be used together with shell scripts to complete tasks.
+
+For example, if you want to download something before compilation, you can write it in a shell script like this:
+```
+wget https://example.com/file.zip
+fmake fmame.props
+```

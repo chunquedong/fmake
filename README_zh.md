@@ -1,19 +1,20 @@
 
-## Overview
+## Fmake
 
 声明式 C++ 构建工具
 
-### Features
+## 特性
 
 - 声明式构建脚本，配置做什么而不是怎么做
 - 跨平台，支持gcc、msvc、emscripten等编译器
 - 生成 Visual Studio、 XCode 项目文件
-- 依赖管理库
+- 内建支持依赖包管理系统
+- 增量编译，只编译修改过的文件
 
 
-### 安装
+## 安装
 
-从源码构建:
+从源码构建(Windows平台使用git bash运行):
 ```
   sh build.sh
 ```
@@ -23,7 +24,8 @@ make
 ```
 添加bin/目录到你的环境变量PATH
 
-### 从shell使用微软C++工具集:
+### 从shell使用微软C++工具集
+每次启动git bash都需要运行:
 ```
 source vsvars.sh
 ```
@@ -116,7 +118,7 @@ excludeSrc = .*(cocoa|posix_).*
   defines: 用户定义的宏
   cppflags: 编译器选项
   linkflags: 连接器选项
-  incDst: 头文件安装位置
+  incDst: 头文件安装文件夹名称
   debug.defines： debug模式的定义
   debug.extLibs： debug模式的额外库名称
 ```
@@ -183,4 +185,9 @@ fmakeRepo
 
 ### 做更多的任务
 
-请编写shell脚本来做，不要在makefile里面写业务逻辑。跨平台编译优先使用编程语言“宏”功能来处理。
+fmake不提供构建以外的功能，不能写业务逻辑，需要与shell脚本配合完成任务。
+例如想做编译前下载东西，在shell脚本中这样写:
+```
+wget https://example.com/file.zip
+fmake fmame.props
+```
